@@ -1,0 +1,20 @@
+{
+  "name": "livemixr",
+  "version": "1.0.0",
+  "description": "LiveMixr",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JakeCooper/LiveMixr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JakeCooper/LiveMixr/issues"
+  },
+  "homepage": "https://github.com/JakeCooper/LiveMixr#readme"
+}
