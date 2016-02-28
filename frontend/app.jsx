@@ -33,11 +33,11 @@ var Oauth = React.createClass({
 			var that = this;
 
 			this.loadProfileInfo(function() {
-
-				React.render(
-					<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
-					document.getElementById('content')
-				);
+				 that.props.setAuthStatus();
+				//React.render(
+				//	<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
+				//	document.getElementById('content')
+				//);
 			});
 			
 		} else {
@@ -175,12 +175,36 @@ var Navbar = React.createClass({
 	}
 });
 
-var MainPage = React.createClass({
+var If = React.createClass({
 	render: function() {
+		if (this.props.test) {
+			return this.props.children;
+		}
+		else {
+			return false;
+		}
+	}
+});
+
+var MainPage = React.createClass({
+	getInitialState: function() {
+		return {isAuthd: false}
+	},
+
+	setAuthStatus: function() {
+		this.setState({isAuthd: true})
+	},
+	render: function() {
+
 		return (
 			<div>
 				<Navbar/>
-				<Oauth/>
+				<If test={!this.state.isAuthd}>
+				<Oauth setAuthStatus={this.setAuthStatus}/>
+				</If>
+				<If test={this.state.isAuthd}>
+				<div> WE LOGGED IN NOW BOYZ </div>
+				</If>
 			</div>
 		)
 	}
