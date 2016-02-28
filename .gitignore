@@ -148,4 +148,6 @@ Temporary Items
 
 ### Sass ###
 .sass-cache/
+css/
 *.css.map
+*.min.css
