@@ -330,7 +330,7 @@ var Explore = React.createClass({
 var ChatPane = React.createClass({
 	render: function() {
 		return (
-			<div>ChatPane</div>
+			<div className="chat-pane">ChatPane</div>
 		)
 	}
 });
@@ -338,7 +338,7 @@ var ChatPane = React.createClass({
 var BrowsePane = React.createClass({
 	render: function() {
 		return (
-			<div>BrowsePane</div>
+			<div className="browse-pane">BrowsePane</div>
 		)
 	}
 });
@@ -346,7 +346,7 @@ var BrowsePane = React.createClass({
 var QueuePane = React.createClass({
 	render: function() {
 		return (
-			<div>QueuePane</div>
+			<div className="queue-pane">QueuePane</div>
 		)
 	}
 });
