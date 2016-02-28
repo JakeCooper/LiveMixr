@@ -326,7 +326,7 @@ var Navbar = React.createClass({
 								<div>
 									<img alt={this.props.user.name} src={this.props.user.image}/>
 									<span className="name">{this.props.user.name}</span>
-									<span className="name logout" onClick={this.logout}>Logout</span>
+									<span className="name logout"><a href="#" onClick={this.logout}>Logout</a></span>
 								</div>
 							: false
 						)}
@@ -421,7 +421,7 @@ var BrowsePane = React.createClass({
         this.setState({ searching: true});
         // find all sounds of buskers licensed under 'creative commons share alike'
         SC.get('/tracks', {
-            q: this.state.search, license: 'cc-by-sa'
+            q: this.state.search
         }).then(function(tracks) {
             that.setState({items: []});
             that.setState({ items: tracks, searching: false });
