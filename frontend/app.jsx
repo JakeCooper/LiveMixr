@@ -54,8 +54,8 @@ var Oauth = React.createClass({
 			var that = this;
 
 			this.loadProfileInfo(function() {
-				that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
-					id: that.state.ProfileId });
+				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
+				 							id: that.state.ProfileId });
 			});
 
 		} else {
@@ -67,14 +67,14 @@ var Oauth = React.createClass({
 	},
 	loadProfileInfo: function(callback) {
 
-		var that = this;
+        var that = this;
 
-		gapi.client.load('plus', 'v1').then(function () {
-			var request = gapi.client.plus.people.get({
-				'userId': 'me'
-			});
+        gapi.client.load('plus', 'v1').then(function () {
+            var request = gapi.client.plus.people.get({
+                'userId': 'me'
+            });
 
-			request.then(function (resp) {
+            request.then(function (resp) {
 
 				that.state.ProfileName = resp.result.displayName;
 				that.state.ProfileImageUrl = resp.result.image.url;
@@ -92,52 +92,52 @@ var Oauth = React.createClass({
 					}
 				});
 
-				callback();
+                callback();
 
-			}, function (reason) {
-				console.log('Error: ' + reason.result.error.message);
-			});
-		});
-	},
-	render: function () {
-		return (
-			<div className="splash">
-				<div className="container">
-					<div className="login-wrapper">
-						<If test={this.state.TriedAuth}>
-							<div>
-								<div className="login-header">
-									<h1>
-										Welcome to Mixr
-									</h1>
-								</div>
-								<div className="login-description">
-									<div>{this.state.content}</div>
-									Mixr makes music social. Joins tens of other users voting, talking and listening to the
-									best music on the web.
-								</div>
-								<div className="login-auth">
-									<button className="btn-google" type="submit" onClick={this.onLogin}>
-										<i className="fa fa-google-plus"></i>
-										<div>
-											<small>Sign in with</small>
-											<br/>
-											<big>Google</big>
-										</div>
-									</button>
-								</div>
-							</div>
-						</If>
-						<If test={!this.state.TriedAuth}>
-							<div className="login-loading">
-								<i className="fa fa-spinner fa-pulse"></i>
-							</div>
-						</If>
-					</div>
-				</div>
-			</div>
-		)
-	}
+            }, function (reason) {
+                console.log('Error: ' + reason.result.error.message);
+            });
+        });
+    },
+    render: function () {
+        return (
+            <div className="splash">
+                <div className="container">
+                    <div className="login-wrapper">
+                    	<If test={this.state.TriedAuth}>
+                    		<div>
+	                            <div className="login-header">
+	                                <h1>
+	                                    Welcome to Mixr
+	                                </h1>
+	                            </div>
+	                            <div className="login-description">
+	                                <div>{this.state.content}</div>
+	                                Mixr makes music social. Joins tens of other users voting, talking and listening to the
+	                                best music on the web.
+	                            </div>
+	                            <div className="login-auth">
+	                                <button className="btn-google" type="submit" onClick={this.onLogin}>
+	                                    <i className="fa fa-google-plus"></i>
+	                                    <div>
+	                                        <small>Sign in with</small>
+	                                        <br/>
+	                                        <big>Google</big>
+	                                    </div>
+	                                </button>
+	                            </div>
+                            </div>
+                        </If>
+                        <If test={!this.state.TriedAuth}>
+                            <div className="login-loading">
+                                <i className="fa fa-spinner fa-pulse"></i>
+                            </div>
+                        </If>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 });
 
 var CommentBox = React.createClass({
@@ -153,8 +153,37 @@ var CommentBox = React.createClass({
 		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
+		var that = this;
+		var first = true;
+
+		this.commentdb.limitToLast(5).once("value", function(comments) {
+
+			comments.forEach(function(comment) {
+
+				var newComment = comment.val();
+
+				that.userdb.child(newComment.author).once("value", function(user) {
+
+					// Add to array of comments
+					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
+
+					that.state.comments.sort(function(a,b) {
+						return a.timestamp > b.timestamp;
+					});
+
+					// Set new comment state
+					that.setState({comments: that.state.comments});
+				});
+			});
+		});
+
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+		this.commentdb.limitToLast(1).on("child_added", function(snapshot, prevKey) {
+
+			if(first == true) {
+				first = false;
+				return;
+			}
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -162,10 +191,7 @@ var CommentBox = React.createClass({
 			this.userdb.child(newComment.author).once("value", function(user) {
 
 				// Add to array of comments 
-				if(that.state.comments.length > 4)
-					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url });
-				else
-					that.state.comments.unshift({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+				that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
 
 				// Set new comment state
 				that.setState({comments: that.state.comments});
@@ -178,16 +204,15 @@ var CommentBox = React.createClass({
 		// Sends new comment to the comment db
 		this.commentdb.push({
 			author: this.props.user.id,
-			text: comment
+			text: comment,
+			timestamp: (new Date).getTime()
 		});
 
 		callback();
 	},
 	render: function() {
 		return (
-			<div className="commentBox">
-				<h2>Hello {this.props.user.name}</h2>
-				<h3>Comments:</h3>
+			<div>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
 			</div>
@@ -196,57 +221,80 @@ var CommentBox = React.createClass({
 });
 
 var CommentList = React.createClass({
-	render: function () {
-		var Comments = (<div>Loading comments...</div>);
-		if (this.props.comments) {
-			Comments = this.props.comments.map(function (comment) {
-				return (<Comment comment={comment}/>);
-			});
-		}
-		return (
-			<div className="commentList">
-				{Comments}
-			</div>
-		);
-	}
+    componentWillUpdate: function() {
+        var node = this.getDOMNode();
+        this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+    },
+    componentDidUpdate: function() {
+        if (this.shouldScrollBottom) {
+            var node = this.getDOMNode();
+            node.scrollTop = node.scrollHeight
+        }
+    },
+    render: function () {
+        var Comments = (<div>Loading comments...</div>);
+        if (this.props.comments) {
+            Comments = this.props.comments.map(function (comment) {
+                return (<Comment comment={comment}/>);
+            });
+        }
+        return (
+            <div className="message-list">
+                {Comments}
+            </div>
+        );
+    }
 });
 var Comment = React.createClass({
-	render: function () {
-		return (
-			<div className="comment">
-				<span className="author-pic"><img src={this.props.comment.image}/></span>
-				<span className="author">{this.props.comment.author}</span> said:<br/>
-				<div className="body">{this.props.comment.text}</div>
-			</div>
-		);
-	}
+    render: function () {
+        return (
+            <div className="message">
+                <div className="profile">
+                    <img src={this.props.comment.image}/>
+                </div>
+                <div className="content">
+                    <span className="author">{this.props.comment.author}</span>
+                    <div className="body">{this.props.comment.text}</div>
+                </div>
+            </div>
+        );
+    }
 });
 var CommentForm = React.createClass({
-	handleSubmit: function (e) {
-		e.preventDefault();
-		var that = this;
-		//var author = this.refs.author.getDOMNode().value;
-		var text = this.refs.text.getDOMNode().value;
-		//var comment = {author: author, text: text};
-		var submitButton = this.refs.submitButton.getDOMNode();
-		submitButton.innerHTML = 'Posting comment...';
-		submitButton.setAttribute('disabled', 'disabled');
-		this.props.submitComment(text, function (err) {
-			that.refs.text.getDOMNode().value = '';
-			submitButton.innerHTML = 'Post comment';
-			submitButton.removeAttribute('disabled');
-		});
-	},
-	render: function () {
-		return (
-			<div>
-				<form className="commentForm" onSubmit={this.handleSubmit}>
-					<textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-					<button type="submit" ref="submitButton">Post comment</button>
-				</form>
-			</div>
-		);
-	}
+    handleSubmit: function (e) {
+        e.preventDefault();
+        var that = this;
+        //var author = this.refs.author.getDOMNode().value;
+        var text = this.refs.text.getDOMNode().value;
+        if (text == "") return;
+        //var comment = {author: author, text: text};
+        var submitButton = this.refs.submit.getDOMNode();
+        submitButton.setAttribute('disabled', 'disabled');
+        this.props.submitComment(text, function (err) {
+            that.refs.text.getDOMNode().value = '';
+            submitButton.removeAttribute('disabled');
+        });
+    },
+    render: function () {
+        return (
+            <div className="message-form">
+                <form onSubmit={this.handleSubmit}>
+                    <div className="message-box">
+                        <input type="text"
+                               ref="text"
+                               className="form-control"
+                               placeholder="Send a Message"
+                               maxLength="200"/>
+                    </div>
+                    <div className="message-button">
+                        <button ref="submit" type="submit" className="btn btn-primary">
+                            <i className='fa fa-paper-plane'></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        );
+    }
 });
 
 var Navbar = React.createClass({
@@ -295,8 +343,6 @@ var MainPage = React.createClass({
 		return {isAuthd: false, userParams: null}
 	},
 	setAuthStatus: function(inParams) {
-		console.log("IN PARAMS")
-		console.log(inParams)
 		this.setState({userParams: inParams, isAuthd: true});
 	},
 	getAuthStatus: function() {
@@ -358,11 +404,30 @@ var QueuePane = React.createClass({
 		queue.push({APIref: songUrl, date: Date.now()})
 	},
 
+	queueDeque: function() {
+		//call dequeue the most recent song. Call after done playing
+		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		fireQueue.on("value", function(payload) {
+			var queue = [];
+			Object.keys(payload.val()).map(function(data){
+				queue.push(payload.val()[data])
+			});
+			Object.keys(payload.val()).map(function(data,index){
+				queue[index]["key"] = data
+			});
+			queue.sort(function(a,b) {
+				return a.date > b.date;
+			});
+			fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/' + queue[0]["key"]);
+			fireQueue.remove();
+		})
+	},
+
 	returnOrderedQueue: function(callback) {
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
 		var that = this;
-		queue.on("value", function(payload) {
-			queue = [];
+		fireQueue.on("value", function(payload) {
+			var queue = [];
 			payload.forEach(function(data){
 				queue.push(data.val())
 			});
@@ -515,27 +580,24 @@ var PlayBar = React.createClass({
 
 	render: function() {
 		return (
-			<div className="playbar">
-				<div className="song-progress">
-					<div className="song-progress-complete"></div>
-				</div>
-				<div class="content">
-					<img className="album-art" src={this.state.cover}/>
-					<div className="wrapper">
-						<div className="info">
-							<p className="song">{this.state.title}</p>
-							<p className="artist-album">{this.state.artist}</p>
-						</div>
-						<CounterComponent/>
-					</div>
-				</div>
-				<div className="mute">
-					setVolume(volume)
-				</div>
-			</div>
-			)
-		}
-	});
+            <div className="playbar">
+                <div className="song-progress">
+                    <div className="song-progress-complete"></div>
+                </div>
+                <div className="content">
+                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
+                    <div className="wrapper">
+                        <div className="info">
+                            <p className="song">Take me back</p>
+                            <p className="artist-album">Nickelback - Here and Now</p>
+                        </div>
+                        <CounterComponent/>
+                    </div>
+                </div>
+            </div>
+		)
+	}
+});
 
 	var CounterComponent = React.createClass({
 	updateSkip: function(){
@@ -544,11 +606,11 @@ var PlayBar = React.createClass({
 	},
 		render: function() {
 		return (
-		<div>
-		<div className="skip-counter">Counter</div>
-		<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
-		</div>
-		)
+			<div>
+				<div className="skip-counter">Counter</div>
+				<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
+			</div>
+			)
 	}
 });
 

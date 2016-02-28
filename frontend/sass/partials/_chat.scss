@@ -1,0 +1,70 @@
+.chat-pane {
+  position: relative;
+
+  .message-list {
+    position: absolute;
+    bottom: 0;
+
+    max-height: 100%;
+    width: 100%;
+
+    padding-bottom: 64px;
+
+    overflow-y: auto;
+
+    .message {
+
+      padding: $padding-large-vertical $padding-large-horizontal;
+      min-height: $chat-icon-height + 2*$padding-large-vertical;
+
+      color: #fff;
+      background: lighten($brand-primary, 10%);
+      border-bottom: solid $border-radius-small lighten($brand-primary, 5%);
+
+      .profile {
+        width: $chat-icon-height;
+        height: 100%;
+        float: left;
+        img {
+          border-radius: $border-radius-base;
+        }
+      }
+      .content {
+        margin-left: $chat-icon-height;
+        padding: $padding-base-vertical $padding-large-horizontal;
+
+        .author {
+          font-weight: bold;
+          margin-bottom: $padding-large-vertical;
+        }
+      }
+    }
+  }
+
+  .message-form {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+
+    padding: $padding-large-vertical $padding-large-horizontal;
+
+    .message-box {
+      @extend .col-xs-9;
+      height: 38px;
+      padding: 0;
+    }
+    .message-button {
+      @extend .col-xs-3;
+      height: 38px;
+      padding-right: 0;
+
+      & > button {
+        @extend .btn;
+        @extend .btn-primary;
+        @extend .btn-block;
+
+        height: 100%;
+      }
+    }
+  }
+}
