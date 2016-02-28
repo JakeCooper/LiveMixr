@@ -1,0 +1,24 @@
+.browse-pane {
+  .search-form {
+    padding-top: $line-height-computed;
+
+    .search-box {
+      @extend .col-xs-9;
+      height: 38px;
+      padding: 0;
+    }
+    .search-button {
+      @extend .col-xs-3;
+      height: 38px;
+      padding-right: 0;
+
+      & > button {
+        @extend .btn;
+        @extend .btn-primary;
+        @extend .btn-block;
+
+        height: 100%;
+      }
+    }
+  }
+}

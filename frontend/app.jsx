@@ -387,13 +387,103 @@ var ChatPane = React.createClass({
 });
 
 var BrowsePane = React.createClass({
+    getInitialState: function() {
+        return {items: [], searching: false}
+    },
+    handleChange: function(sel) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(this.handleSubmit, 300);
+    },
+    handleSubmit: function (){
+        if (this.state.searching) return;
+        clearTimeout(this.timeout);
+        this.getTracks(this);
+    },
+    getTracks: function(that) {
+
+        SC.initialize({
+            client_id: '562a196f46a9c2241f185373ee32d44a'
+        });
+
+        this.setState({ searching: true });
+        // find all sounds of buskers licensed under 'creative commons share alike'
+        SC.get('/tracks', {
+            q: this.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
+        }).then(function(tracks) {
+            that.setState({ searching: false });
+            that.setState({items: tracks});
+        });
+    },
+    reset: function() {
+        this.setState({items: [], searching: false});
+    },
+    appendToQueue: function() {
+        console.log("test");
+    },
 	render: function() {
 		return (
-			<div className="pane browse-pane">
-				<SearchBox/>
-			</div>
+            <div className="pane browse-pane container">
+                <div className="row">
+                    <div className="col-md-6">
+                        <h1>Browse</h1>
+                    </div>
+                    <div className="search-form col-md-6">
+                        <form onSubmit={this.handleSubmit}>
+                            <div className="search-box">
+                                <input type="text"
+                                       ref="searchtext"
+                                       className="form-control"
+                                       onChange={this.handleChange}
+                                       placeholder="Search for a Song"
+                                       maxLength="200"/>
+                            </div>
+                            <div className="search-button">
+                                <button ref="submit" type="submit" className="btn btn-primary">
+                                    { this.state.searching ?
+                                        <i className='fa fa-cog fa-spin'></i>
+                                        : <i className='fa fa-search'></i> }
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-lg-12">
+                        {this.state.items.map(function (track, i) {
+                            return (
+                                <div>
+                                    <BrowseItem track={track} owner={this}/>
+                                </div>
+                            );
+                        }.bind(this))}
+                    </div>
+                </div>
+            </div>
 		)
 	}
+});
+
+var BrowseItem = React.createClass({
+    message: function(id) {
+
+        // Adds the track ID to queue
+        var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+        queue.push({APIref: id, date: Date.now()});
+
+        this.props.owner.reset();
+    },
+    render: function() {
+        return (
+
+            <span>
+			{(this.props.track || false) ?
+                <div className="browse-item" onClick={this.message.bind(this, this.props.track.id)}>
+                    {this.props.track.title}
+                </div>
+                : false}
+			</span>
+        )
+    }
 });
 
 var QueuePane = React.createClass({
@@ -520,88 +610,6 @@ var QueueItem = React.createClass({
 	}
 });
 
-
-
-var SearchItem = React.createClass({
-	message: function(id) {
-
-		// Adds the track ID to queue
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		queue.push({APIref: id, date: Date.now()});
-
-		this.props.owner.reset();
-	},
-	render: function() {
-		return (
-
-			<span>
-			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
-			</span>
-		)
-	}
-});
-
-var SearchBox = React.createClass({
-	getInitialState: function() {
-		return {items: []}
-	},
-	handleChange: function(sel) {
-		//console.log(sel);
-		var that = this;
-		this.reset();
-		clearTimeout(this.timeout);
-		this.timeout = setTimeout(function() {
-
-			SC.initialize({
-				client_id: '562a196f46a9c2241f185373ee32d44a'
-			});
-
-			// find all sounds of buskers licensed under 'creative commons share alike'
-			SC.get('/tracks', {
-				q: that.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
-			}).then(function(tracks) {
-				that.setState({items: tracks});
-			});
-		},500);
-
-	},
-	reset: function() {
-		this.setState({items: []});
-	},
-	appendToQueue: function() {
-		console.log("test");
-	},
-	render: function() {
-		return (
-			<form className="navbar-form navbar-left" role="search">
-				<div className="form-group">
-					<input type="text" ref="searchtext" onChange={this.handleChange} className="form-control" placeholder="Search"/>
-				</div>
-				<button type="submit" className="btn btn-default">Submit</button>
-				<div>
-
-					{this.state.items.map(function(track, i) {
-						return (
-							<div>
-								<SearchItem track={track} owner={this}/>
-							</div>
-						);
-					}.bind(this))}
-				</div>
-			</form>
-		)
-	}
-})
-//
-//var SearchResults = React.createClass({
-//	handleSearch: function() {
-//		console.out("TEST");
-//	},
-//
-//	render: function() {
-//		<div className="search-results">handleSearch</div>
-//	}
-//})
 
 var UserComponent = React.createClass({
 	render: function() {
