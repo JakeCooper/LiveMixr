@@ -358,11 +358,30 @@ var QueuePane = React.createClass({
 		queue.push({APIref: songUrl, date: Date.now()})
 	},
 
+	queueDeque: function() {
+		//call dequeue the most recent song. Call after done playing
+		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		fireQueue.on("value", function(payload) {
+			var queue = [];
+			Object.keys(payload.val()).map(function(data){
+				queue.push(payload.val()[data])
+			});
+			Object.keys(payload.val()).map(function(data,index){
+				queue[index]["key"] = data
+			});
+			queue.sort(function(a,b) {
+				return a.date > b.date;
+			});
+			fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/' + queue[0]["key"]);
+			fireQueue.remove();
+		})
+	},
+
 	returnOrderedQueue: function(callback) {
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
 		var that = this;
-		queue.on("value", function(payload) {
-			queue = [];
+		fireQueue.on("value", function(payload) {
+			var queue = [];
 			payload.forEach(function(data){
 				queue.push(data.val())
 			});
