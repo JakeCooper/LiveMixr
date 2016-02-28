@@ -1,18 +1,10 @@
 [
     {
-        "author": "Sebastien Chopin",
-        "text": "Carrement enorme !:)"
-    },
-    {
-        "author": "Manon Tourrette",
-        "text": "Je t'aime mon cheri !"
-    },
-    {
-        "author": "Aaron Blum",
-        "text": "Je t'aime aussi mon bebe"
+        "author": "Testing",
+        "text": "newComment"
     },
     {
         "author": "Testing",
-        "text": "newComment"
+        "text": "asdf"
     }
 ]
