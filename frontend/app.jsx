@@ -1,50 +1,76 @@
 var Oauth = React.createClass({
-    getInitialState: function () {
-        return {
-            RedirectURL: "http://livemixr.azurewebsites.net/",
-            ClientID: "870671781604-65ndlh54fkgpjsufkq2pmsn6rm3bvr8p.apps.googleusercontent.com",
-            CookiePolicy: "single_host_origin",
-            RequestVisibleActions: "http://schema.org/AddAction",
-            Scope: "https://www.googleapis.com/auth/plus.profile.emails.read",
-            ProfileName: null,
-            ProfileImageUrl: null
-        };
-    },
+	getInitialState: function () {
+		return {
+			RedirectURL: "http://livemixr.azurewebsites.net/",
+			ClientID: "870671781604-65ndlh54fkgpjsufkq2pmsn6rm3bvr8p.apps.googleusercontent.com",
+			CookiePolicy: "single_host_origin",
+			RequestVisibleActions: "http://schema.org/AddAction",
+			Scope: "https://www.googleapis.com/auth/plus.profile.emails.read",
+			ProfileName: null,
+			ProfileImageUrl: null,
+			ProfileId: null,
+			TriedAuth: false,
+			content: null
+		};
+	},
+	componentDidMount: function () {
+		gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
 
-    onLogin: function () {
-        gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
+		// We try to auth as soon as page is loaded. If true, then we move past login page instantly
+		// If not, then we wait for user to hit login and do the full page-by-page auth request
+		this.SigninData = {
+			'client_id': this.state.ClientID,
+			'cookiepolicy': this.state.CookiePolicy,
+			'requestvisibleactions': this.state.RequestVisibleActions,
+			'scope': this.state.Scope,
+			'immediate': true // Means we want to instantly know if user is authed or not
+		};
 
-        var SigninData = {
-            'client_id': this.state.ClientID,
-            'cookiepolicy': this.state.CookiePolicy,
-            'requestvisibleactions': this.state.RequestVisibleActions,
-            'scope': this.state.Scope
-        };
+		gapi.auth.authorize(
+			this.SigninData,
+			this.onAuthCallback
+		);
 
-        // lol good luck
-        gapi.auth.authorize(
-            SigninData,
-            this.onAuthCallback
-        );
-    },
-    onAuthCallback: function (AuthResult) {
-        if (AuthResult && !AuthResult.error) {
+	},
+	onLogin: function() {
+
+		this.SigninData.immediate = false;
+
+		// lol good luck
+		gapi.auth.authorize( 
+			this.SigninData,
+			this.onAuthCallback
+		);
+	},
+	onAuthCallback: function(AuthResult) {
+
+		// This will signal to show the login bar after first auth attempt
+		// If the first auth failed, then user will have to login
+		TriedAuth = true;
+
+		if (AuthResult && !AuthResult.error) {
 
             var that = this;
 
-            this.loadProfileInfo(function () {
+			this.loadProfileInfo(function() {
 
-                React.render(
-                    <CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
-                    document.getElementById('content')
-                );
-            });
+				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
+				 							id: that.state.ProfileId });
 
-        } else {
-            this.setState({content: "Auth Failed!"});
-        }
-    },
-    loadProfileInfo: function (callback) {
+				//React.render(
+				//	<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
+				//	document.getElementById('content')
+				//);
+			});
+
+		} else {
+
+			// TODO: What to do if auth fails?
+
+			this.setState({content:"Failed to login to Google+"});
+		}
+	},
+	loadProfileInfo: function(callback) {
 
         var that = this;
 
@@ -55,8 +81,21 @@ var Oauth = React.createClass({
 
             request.then(function (resp) {
 
-                that.state.ProfileName = resp.result.displayName;
-                that.state.ProfileImageUrl = resp.result.image.url;
+				that.state.ProfileName = resp.result.displayName;
+				that.state.ProfileImageUrl = resp.result.image.url;
+				that.state.ProfileId = resp.result.id;
+
+				// Save data to firebase
+				that.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users/' + that.state.ProfileId);
+
+				// Load the user value
+				that.userdb.once('value', function(user) {
+
+					// See if this user has been persisted to the db. If not, save their data
+					if(!user.hasChild("id")) {
+						that.userdb.set({name: that.state.ProfileName, id: that.state.ProfileId, profile_url: that.state.ProfileImageUrl});
+					}
+				});
 
                 callback();
 
@@ -95,37 +134,51 @@ var Oauth = React.createClass({
 });
 
 var CommentBox = React.createClass({
-    getInitialState: function () {
-        return {
-            comments: null
-        };
-    },
-    componentDidMount: function () {
-        var that = this;
-        this.socket = io();
-        this.socket.on('comments', function (comments) {
-            that.setState({comments: comments});
-        });
-        this.socket.emit('fetchComments');
-    },
-    submitComment: function (comment, callback) {
-        this.socket.emit('newComment', comment, function (err) {
-            if (err)
-                return console.error('New comment error:', err);
-            callback();
-        });
-    },
-    render: function () {
-        return (
-            <div className="commentBox">
-                <h2>Hello {this.props.profileName}</h2>
-                <img src={this.props.profileUrl}/>
-                <h3>Comments:</h3>
-                <CommentList comments={this.state.comments}/>
-                <CommentForm submitComment={this.submitComment}/>
-            </div>
-        );
-    }
+	mixins: [ReactFireMixin],
+
+	getInitialState: function () {
+		return {
+			comments: []
+		};
+	},
+	componentDidMount: function () {
+
+		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
+
+		// Will pull the latest 5 messages, and then continue adding new messages
+		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+
+			var newComment = snapshot.val();
+
+			// Add to array of comments
+			this.state.comments.push({author: newComment.author, text: newComment.text });
+
+			// Set new comment state
+			this.setState({comments: this.state.comments});
+
+		}, function(){}, this);
+	},
+	submitComment: function (comment, callback) {
+
+		// Sends new comment to the comment db
+		this.commentdb.push({
+			author: comment.author,
+			text: comment.text
+		});
+
+		callback();
+	},
+	render: function() {
+		return (
+			<div className="commentBox">
+				<h2>Hello {this.props.profileName}</h2>
+				<img src={this.props.profileUrl}/>
+				<h3>Comments:</h3>
+				<CommentList comments={this.state.comments}/>
+				<CommentForm submitComment={this.submitComment}/>
+			</div>
+		);
+	}
 });
 
 var CommentList = React.createClass({
@@ -203,15 +256,92 @@ var Navbar = React.createClass({
     }
 });
 
+var If = React.createClass({
+	render: function() {
+		if (this.props.test) {
+			return this.props.children;
+		}
+		else {
+			return false;
+		}
+	}
+});
+
 var MainPage = React.createClass({
-    render: function () {
-        return (
-            <div>
-                <Navbar/>
-                <Oauth/>
-            </div>
-        )
-    }
+	getInitialState: function() {
+		return {isAuthd: false, userParams: null}
+	},
+
+	setAuthStatus: function(inParams) {
+		this.setState({isAuthd: true, userParams: inParams});
+	},
+	render: function() {
+
+		return (
+			<div>
+				<Navbar userParams={this.state.userParams}/>
+				<If test={!this.state.isAuthd}>
+				<Oauth setAuthStatus={this.setAuthStatus}/>
+				</If>
+				<If test={this.state.isAuthd}>
+				<Explore/>
+				</If>
+			</div>
+		)
+	}
+});
+
+var Explore = React.createClass({
+	render: function() {
+		return (
+			<div className="explore-pane">
+				<ChatPane/>
+				<BrowsePane/>
+				<QueuePane/>
+				<PlayerComponent/>
+			</div>
+		)
+	}
+});
+
+var ChatPane = React.createClass({
+	render: function() {
+		return (
+			<div>ChatPane</div>
+		)
+	}
+});
+
+var BrowsePane = React.createClass({
+	render: function() {
+		return (
+			<div>BrowsePane</div>
+		)
+	}
+});
+
+var QueuePane = React.createClass({
+	render: function() {
+		return (
+			<div>QueuePane</div>
+		)
+	}
+});
+
+var UserComponent = React.createClass({
+	render: function() {
+		return (
+			<div>UserComponent</div>
+		)
+	}
+});
+
+var PlayerComponent = React.createClass({
+	render: function() {
+		return (
+			<div>PlayerComponent</div>
+		)
+	}
 });
 
 React.render(
