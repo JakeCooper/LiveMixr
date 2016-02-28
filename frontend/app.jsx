@@ -54,15 +54,8 @@ var Oauth = React.createClass({
             var that = this;
 
 			this.loadProfileInfo(function() {
-
-
 				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
 				 							id: that.state.ProfileId });
-
-				//React.render(
-				//	<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
-				//	document.getElementById('content')
-				//);
 			});
 
 		} else {
@@ -158,17 +151,25 @@ var CommentBox = React.createClass({
 	componentDidMount: function () {
 
 		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
+		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
 		// Will pull the latest 5 messages, and then continue adding new messages
 		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
+			var that = this;
 
-			// Add to array of comments
-			this.state.comments.push({author: newComment.author, text: newComment.text });
+			this.userdb.child(newComment.author).once("value", function(user) {
 
-			// Set new comment state
-			this.setState({comments: this.state.comments});
+				// Add to array of comments 
+				if(that.state.comments.length > 4)
+					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+				else
+					that.state.comments.unshift({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+
+				// Set new comment state
+				that.setState({comments: that.state.comments});
+			});
 
 		}, function(){}, this);
 	},
@@ -176,8 +177,8 @@ var CommentBox = React.createClass({
 
 		// Sends new comment to the comment db
 		this.commentdb.push({
-			author: comment.author,
-			text: comment.text
+			author: this.props.user.id,
+			text: comment
 		});
 
 		callback();
@@ -185,8 +186,7 @@ var CommentBox = React.createClass({
 	render: function() {
 		return (
 			<div className="commentBox">
-				<h2>Hello {this.props.profileName}</h2>
-				<img src={this.props.profileUrl}/>
+				<h2>Hello {this.props.user.name}</h2>
 				<h3>Comments:</h3>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
@@ -214,6 +214,7 @@ var Comment = React.createClass({
     render: function () {
         return (
             <div className="comment">
+            	<span className="author-pic"><img src={this.props.comment.image}/></span>
                 <span className="author">{this.props.comment.author}</span> said:<br/>
                 <div className="body">{this.props.comment.text}</div>
             </div>
@@ -224,14 +225,13 @@ var CommentForm = React.createClass({
     handleSubmit: function (e) {
         e.preventDefault();
         var that = this;
-        var author = this.refs.author.getDOMNode().value;
+        //var author = this.refs.author.getDOMNode().value;
         var text = this.refs.text.getDOMNode().value;
-        var comment = {author: author, text: text};
+        //var comment = {author: author, text: text};
         var submitButton = this.refs.submitButton.getDOMNode();
         submitButton.innerHTML = 'Posting comment...';
         submitButton.setAttribute('disabled', 'disabled');
-        this.props.submitComment(comment, function (err) {
-            that.refs.author.getDOMNode().value = '';
+        this.props.submitComment(text, function (err) {
             that.refs.text.getDOMNode().value = '';
             submitButton.innerHTML = 'Post comment';
             submitButton.removeAttribute('disabled');
@@ -241,7 +241,6 @@ var CommentForm = React.createClass({
         return (
             <div>
                 <form className="commentForm" onSubmit={this.handleSubmit}>
-                    <input type="text" name="author" ref="author" placeholder="Name" required/><br/>
                     <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
                     <button type="submit" ref="submitButton">Post comment</button>
                 </form>
@@ -253,13 +252,8 @@ var CommentForm = React.createClass({
 var Navbar = React.createClass({
 	getInitialState: function () {
 		return {
-
 		};
 	},
-	componentDidMount: function () {
-
-	},
-
     render: function () {
         return (
             <div className="navbar navbar-default navbar-fixed-top">
@@ -267,12 +261,18 @@ var Navbar = React.createClass({
                     <div className="navbar-header">
                         <img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
                     </div>
-                    <div className="navbar-title">
+					<div className="navbar-title">
                         <h1>LiveMixr</h1>
                     </div>
                     <div className="navbar-user">
-                        <img alt={this.props.name} src={this.props.image}/>
-                        <span className="name">{this.props.name}</span>
+                    {(this.props.authed == true
+				        ? 
+				          <div>
+				          	<img alt={this.props.user.name} src={this.props.user.image}/>
+				          	<span className="name">{this.props.user.name}</span> 
+				          </div>
+				        : false
+				    )}
                     </div>
                 </div>
             </div>
@@ -284,8 +284,7 @@ var If = React.createClass({
 	render: function() {
 		if (this.props.test) {
 			return this.props.children;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -293,22 +292,26 @@ var If = React.createClass({
 
 var MainPage = React.createClass({
 	getInitialState: function() {
-		return {isAuthd: false, userParams: {}}
+		return {isAuthd: false, userParams: null}
 	},
-
 	setAuthStatus: function(inParams) {
-		this.setState({isAuthd: true, userParams: inParams});
+		console.log("IN PARAMS")
+		console.log(inParams)
+		this.setState({userParams: inParams, isAuthd: true});
+	},
+	getAuthStatus: function() {
+		return this.state.isAuthd === true;
 	},
 	render: function() {
 
 		return (
 			<div>
-				<Navbar image={this.state.userParams.image} name={this.state.userParams.name}/>
+				<Navbar user={this.state.userParams} authed={this.state.isAuthd}/>
 				<If test={!this.state.isAuthd}>
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore/>
+				<Explore user={this.state.userParams}/>
 				</If>
 			</div>
 		)
@@ -319,8 +322,8 @@ var Explore = React.createClass({
 	render: function() {
 		return (
 			<div className="container container-explore">
-                <BrowsePane/>
-				<ChatPane/>
+				<ChatPane user={this.props.user}/>
+				<BrowsePane/>
 				<QueuePane/>
 				<PlayBar/>
 			</div>
@@ -331,7 +334,9 @@ var Explore = React.createClass({
 var ChatPane = React.createClass({
 	render: function() {
 		return (
-			<div className="pane chat-pane">ChatPane</div>
+			<div className="pane chat-pane">
+				<CommentBox user={this.props.user}/>
+			</div>
 		)
 	}
 });
