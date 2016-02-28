@@ -355,7 +355,7 @@ var QueuePane = React.createClass({
 	},
 	queueAppend: function(songUrl) {
 		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		queue.push({link: songUrl})
+		queue.push({APIref: songUrl, date: Date.now()})
 	},
 
 	returnOrderedQueue: function(callback) {
@@ -365,6 +365,9 @@ var QueuePane = React.createClass({
 			queue = [];
 			payload.forEach(function(data){
 				queue.push(data.val())
+			});
+			queue.sort(function(a,b) {
+				return a.date > b.date;
 			});
 			that.setState({queue: queue})
 		})
@@ -377,19 +380,57 @@ var QueuePane = React.createClass({
 					: false
 				}
 				{this.state.queue.map(function(item) {
-					return <QueueItem item={item}/>
+					return <QueueWrapper APIref={item.APIref}/>
 				})}
 			</div>
 		)
 	}
 });
 
+var QueueWrapper = React.createClass({
+	getInitialState: function() {
+		return {song: {}, requested: false}
+	},
+	ComponentShouldUpdate: function() {
+		return (Object.keys(this.state.song).length == 0 || !this.state.requested )
+	},
 
+	getSongInfo: function(songId, callback) {
+		var request = new XMLHttpRequest();
+		request.open('GET', 'https://api.soundcloud.com/tracks/' + songId + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+		var that = this;
+		request.onload = function() {
+			if (request.status >= 200 && request.status < 400) {
+				var data = JSON.parse(request.responseText);
+				that.setState({song:data, requested:true})
+			} else {
+				//handle failure from server
+			}
+		};
+
+		request.onerror = function() {
+			//connection problem
+		};
+
+		request.send();
+	},
+
+	render: function() {
+		return (
+			<div className="queue-item">
+				{(Object.keys(this.state.song)).length > 0
+					? <QueueItem songInfo={this.state.song}/>
+					: this.getSongInfo(this.props.APIref)
+				}
+			</div>
+		)
+	}
+});
 
 var QueueItem = React.createClass({
 	render: function() {
 		return (
-			<div className="queue-item">{this.props.item}</div>
+			<div>{this.props.songInfo.title}</div>
 		)
 	}
 });
