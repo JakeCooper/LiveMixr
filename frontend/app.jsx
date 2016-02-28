@@ -307,6 +307,9 @@ var Navbar = React.createClass({
 		return {
 		};
 	},
+	logout: function() {
+		gapi.auth.signOut();
+	},
 	render: function () {
 		return (
 			<div className="navbar navbar-default navbar-fixed-top">
@@ -323,8 +326,9 @@ var Navbar = React.createClass({
 								<div>
 									<img alt={this.props.user.name} src={this.props.user.image}/>
 									<span className="name">{this.props.user.name}</span>
+									<span className="name logout" onClick={this.logout}>Logout</span>
 								</div>
-								: false
+							: false
 						)}
 					</div>
 				</div>

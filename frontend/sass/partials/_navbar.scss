@@ -193,6 +193,12 @@
     padding: 7px;
     color: #fff;
   }
+  .logout {
+    font-weight: bold;
+    font-size: 16px;
+    padding-left: 15px;
+    cursor: pointer;
+  }
   @media (min-width: $grid-float-breakpoint) {
   .navbar > .container &,
   .navbar > .container-fluid & {
