@@ -497,6 +497,14 @@ var QueueWrapper = React.createClass({
 
 
 var QueueItem = React.createClass({
+	render: function() {
+		return {
+
+		}
+	}
+});
+
+var SearchItem = React.createClass({
 	message: function(id) {
 
 		// Adds the track ID to queue
@@ -556,7 +564,7 @@ var SearchBox = React.createClass({
 					{this.state.items.map(function(track, i) {
 						return (
 							<div>
-								<QueueItem track={track} owner={this}/>
+								<SearchItem track={track} owner={this}/>
 							</div>
 						);	
 					}.bind(this))}
