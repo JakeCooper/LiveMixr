@@ -151,17 +151,22 @@ var CommentBox = React.createClass({
 	componentDidMount: function () {
 
 		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
+		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
 		// Will pull the latest 5 messages, and then continue adding new messages
 		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
+			var that = this;
 
-			// Add to array of comments
-			this.state.comments.push({author: newComment.author, text: newComment.text });
+			this.userdb.child(newComment.author).once("value", function(user) {
 
-			// Set new comment state
-			this.setState({comments: this.state.comments});
+				// Add to array of comments
+				that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+
+				// Set new comment state
+				that.setState({comments: that.state.comments});
+			});
 
 		}, function(){}, this);
 	},
@@ -169,8 +174,8 @@ var CommentBox = React.createClass({
 
 		// Sends new comment to the comment db
 		this.commentdb.push({
-			author: comment.author,
-			text: comment.text
+			author: this.props.user.id,
+			text: comment
 		});
 
 		callback();
@@ -206,6 +211,7 @@ var Comment = React.createClass({
     render: function () {
         return (
             <div className="comment">
+            	<span className="author-pic"><img src={this.props.comment.image}/></span>
                 <span className="author">{this.props.comment.author}</span> said:<br/>
                 <div className="body">{this.props.comment.text}</div>
             </div>
@@ -216,14 +222,13 @@ var CommentForm = React.createClass({
     handleSubmit: function (e) {
         e.preventDefault();
         var that = this;
-        var author = this.refs.author.getDOMNode().value;
+        //var author = this.refs.author.getDOMNode().value;
         var text = this.refs.text.getDOMNode().value;
-        var comment = {author: author, text: text};
+        //var comment = {author: author, text: text};
         var submitButton = this.refs.submitButton.getDOMNode();
         submitButton.innerHTML = 'Posting comment...';
         submitButton.setAttribute('disabled', 'disabled');
-        this.props.submitComment(comment, function (err) {
-            that.refs.author.getDOMNode().value = '';
+        this.props.submitComment(text, function (err) {
             that.refs.text.getDOMNode().value = '';
             submitButton.innerHTML = 'Post comment';
             submitButton.removeAttribute('disabled');
@@ -233,7 +238,6 @@ var CommentForm = React.createClass({
         return (
             <div>
                 <form className="commentForm" onSubmit={this.handleSubmit}>
-                    <input type="text" name="author" ref="author" placeholder="Name" required/><br/>
                     <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
                     <button type="submit" ref="submitButton">Post comment</button>
                 </form>
