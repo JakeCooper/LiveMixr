@@ -154,7 +154,7 @@ var CommentBox = React.createClass({
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+		this.commentdb.limitToLast(20).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -476,8 +476,16 @@ var QueueItem = React.createClass({
                 </div>
                 <div className="content">
                     <div className="info">
-                        <div className="title">{this.props.songInfo.title}</div>
-                        <div className="user">{this.props.songInfo.user.username}</div>
+                        <div className="title">
+                            <a href={this.props.songInfo.permalink_url} target="_blank">
+                                {this.props.songInfo.title}
+                            </a>
+                        </div>
+                        <div className="user">
+                            <a href={this.props.songInfo.user.permalink_url} target="_blank">
+                                {this.props.songInfo.user.username}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
