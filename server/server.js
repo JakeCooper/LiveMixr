@@ -93,3 +93,13 @@ io.on('connection', function (socket) {
 		socket.emit('updateusercount', sessions.length);
 	});
 });
+
+// queue bullshit
+
+currentSong = undefined;
+songFinish = undefined;
+
+db.child("queue").limitToFirst(1).on("child_added", function(key, prev) {
+
+	console.log(key);
+});
