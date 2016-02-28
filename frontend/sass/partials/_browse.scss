@@ -1,0 +1,79 @@
+.browse-pane {
+  .search-form {
+    padding-top: $line-height-computed;
+
+    .search-box {
+      @extend .col-xs-9;
+      height: 38px;
+      padding: 0;
+    }
+    .search-button {
+      @extend .col-xs-3;
+      height: 38px;
+      padding-right: 0;
+
+      & > button {
+        @extend .btn;
+        @extend .btn-primary;
+        @extend .btn-block;
+
+        height: 100%;
+      }
+    }
+  }
+  .search-info {
+    @extend .col-md-4;
+    @extend .col-md-offset-4;
+    margin-top: 10*$line-height-computed;
+
+    &.search-loading {
+      text-align: center;
+      font-size: 60px;
+      color: $gray-light;
+    }
+  }
+
+  .browse-song {
+    min-height: $browse-album-height;
+    margin: 2*$padding-large-vertical $padding-large-horizontal;
+
+    .album-art {
+      float: left;
+      width: $browse-album-height;
+      img {
+        width: 100%;
+        border-radius: $border-radius-base;
+      }
+    }
+    .content {
+      margin-left: $browse-album-height;
+
+      padding: 0 $padding-large-horizontal;
+
+      .title {
+        font-weight: bold;
+        font-size: $font-size-large;
+
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .user {
+        padding-bottom: $padding-base-vertical;
+      }
+      .controls {
+        padding: $padding-base-vertical $padding-base-horizontal;
+        text-align: right;
+      }
+      a {
+        color: $text-color;
+        &:hover, &:focus {
+          color: $text-color;
+        }
+        &:focus {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}

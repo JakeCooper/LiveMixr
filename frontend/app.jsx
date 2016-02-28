@@ -393,13 +393,152 @@ var ChatPane = React.createClass({
 });
 
 var BrowsePane = React.createClass({
+    getInitialState: function() {
+        return {items: [], searching: true, search: "*"}
+    },
+    componentWillMount: function (){
+        this.getTracks(this);
+    },
+    handleChange: function(sel) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(this.handleSubmit, 300);
+    },
+    handleSubmit: function (){
+        if (this.state.searching) return;
+        clearTimeout(this.timeout);
+        this.setState({ search: this.refs.searchtext.getDOMNode().value});
+        this.getTracks(this);
+    },
+    getTracks: function(that) {
+        SC.initialize({
+            client_id: '562a196f46a9c2241f185373ee32d44a'
+        });
+
+        this.setState({ searching: true});
+        // find all sounds of buskers licensed under 'creative commons share alike'
+        SC.get('/tracks', {
+            q: this.state.search, license: 'cc-by-sa'
+        }).then(function(tracks) {
+            that.setState({items: []});
+            that.setState({ items: tracks, searching: false });
+        });
+    },
+    reset: function() {
+        this.setState({items: [], searching: false});
+    },
+    appendToQueue: function() {
+        console.log("test");
+    },
 	render: function() {
+        var tracks;
+        var search = this.state.search;
+        if (this.state.searching){
+            tracks =
+                <div className="search-info search-loading">
+                    <i className="fa fa-spinner fa-pulse"/>
+                </div>
+        } else if (this.state.items.length > 0){
+            tracks = this.state.items.map(function (track, i) {
+                return (<BrowseItem track={track} owner={this}/>);
+            }.bind(this));
+        } else {
+            tracks =
+                <div className="search-info search-error">
+                    <h2>Uh oh.</h2>
+                    <p>No songs found for <b>{search}</b>.</p>
+                </div>
+        }
+
 		return (
-			<div className="pane browse-pane">
-				<SearchBox/>
-			</div>
+            <div className="pane browse-pane container">
+                <div className="row">
+                    <div className="col-md-6">
+                        <h1>Browse</h1>
+                    </div>
+                    <div className="search-form col-md-6">
+                        <form onSubmit={this.handleSubmit}>
+                            <div className="search-box">
+                                <input type="text"
+                                       ref="searchtext"
+                                       className="form-control"
+                                       onChange={this.handleChange}
+                                       placeholder="Search for a Song"
+                                       maxLength="200"/>
+                            </div>
+                            <div className="search-button">
+                                <button ref="submit" type="submit" className="btn btn-primary">
+                                    <i className='fa fa-search'></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-lg-12">
+                        {tracks}
+                    </div>
+                </div>
+            </div>
 		)
 	}
+});
+
+var BrowseItem = React.createClass({
+    getInitialState: function() {
+        return {added: false}
+    },
+    message: function(id) {
+
+        // Adds the track ID to queue
+        var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+        queue.push({APIref: id, date: Date.now()});
+        this.setState({ added: true });
+    },
+    render: function() {
+        var added = this.state.added;
+        desclen = 180;
+        var track = this.props.track;
+        var button = {
+            icon: 'fa fa-' + (added ? 'check' : 'plus'),
+            text: added ? 'Added to Queue' : 'Add to Queue',
+            class: 'btn btn-default' + (added ? " disabled" : "")
+        };
+        return (
+            <span>
+			{(track || false) ?
+                <div className="browse-song">
+                    <div className="album-art">
+                        <img src={track.artwork_url || "/img/Album-Placeholder.svg"}/>
+                    </div>
+                    <div className="content">
+                        <div className="info">
+                            <div className="title">
+                                <a href={track.permalink_url} target="_blank">
+                                    {track.title}
+                                </a>
+                            </div>
+                            <div className="user">
+                                <a href={track.user.permalink_url} target="_blank">
+                                    {track.user.username}
+                                </a>
+                            </div>
+                            <div className="description">
+                                {track.description.length < desclen ?
+                                    track.description : track.description.slice(0, desclen) + "..."}
+                            </div>
+                            <div className="controls">
+                                <button className={button.class} disabled={added}
+                                        onClick={!added ? this.message.bind(this, track.id) : null}>
+                                    <i className={button.icon}/> {button.text}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                : false}
+			</span>
+        )
+    }
 });
 
 var QueuePane = React.createClass({
@@ -527,91 +666,6 @@ var QueueItem = React.createClass({
 });
 
 
-
-var SearchItem = React.createClass({
-	message: function(id) {
-
-		// Adds the track ID to queue
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		var request = new XMLHttpRequest();
-		request.open('GET', 'https://api.soundcloud.com/tracks/' + id + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
-		request.onload = function() {
-			if (request.status >= 200 && request.status < 400) {
-				var data = JSON.parse(request.responseText);
-				queue.push({APIref: id, date: Date.now(),length:data.duration});
-			} else {
-				//handle failure from server
-			}
-		};
-
-		request.onerror = function() {
-			//connection problem
-		};
-
-		request.send();
-		this.props.owner.reset();
-	},
-	render: function() {
-		return (
-			<span>
-			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
-			</span>
-		)
-	}
-});
-
-var SearchBox = React.createClass({
-	getInitialState: function() {
-		return {items: []}
-	},
-	handleChange: function(sel) {
-		//console.log(sel);
-		var that = this;
-		this.reset();
-		clearTimeout(this.timeout);
-		this.timeout = setTimeout(function() {
-
-			SC.initialize({
-				client_id: '562a196f46a9c2241f185373ee32d44a'
-			});
-
-			// find all sounds of buskers licensed under 'creative commons share alike'
-			SC.get('/tracks', {
-				q: that.refs.searchtext.getDOMNode().value
-			}).then(function(tracks) {
-				that.setState({items: tracks});
-			});
-		},500);
-
-	},
-	reset: function() {
-		this.setState({items: []});
-	},
-	appendToQueue: function() {
-		console.log("test");
-	},
-	render: function() {
-		return (
-			<form className="navbar-form navbar-left" role="search">
-				<div className="form-group">
-					<input type="text" ref="searchtext" onChange={this.handleChange} className="form-control" placeholder="Search"/>
-				</div>
-				<button type="submit" className="btn btn-default">Submit</button>
-				<div>
-
-					{this.state.items.map(function(track, i) {
-						return (
-							<div>
-								<SearchItem track={track} owner={this}/>
-							</div>
-						);
-					}.bind(this))}
-				</div>
-			</form>
-		)
-	}
-})
-
 var UserComponent = React.createClass({
 	render: function() {
 		return (
@@ -628,11 +682,11 @@ var PlayBar = React.createClass({
 		}
 	},
 	componentDidMount: function () {
-		
+
 		var that = this;
 
 		socket.on('updateusercount', function(count) {
-			that.setState({listeners: count});			
+			that.setState({listeners: count});
 		});
 
 		socket.emit('getusercount');
@@ -753,7 +807,7 @@ var CounterComponent = React.createClass({
 		var that = this;
 
 		socket.on('updateskipcount', function(count) {
-			that.setState({skippers: count});			
+			that.setState({skippers: count});
 		});
 	},
 	updateSkip: function(){
