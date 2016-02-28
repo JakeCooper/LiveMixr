@@ -38,7 +38,7 @@ var Oauth = React.createClass({
 		this.SigninData.immediate = false;
 
 		// lol good luck
-		gapi.auth.authorize( 
+		gapi.auth.authorize(
 			this.SigninData,
 			this.onAuthCallback
 		);
@@ -51,7 +51,7 @@ var Oauth = React.createClass({
 
 		if (AuthResult && !AuthResult.error) {
 
-            var that = this;
+			var that = this;
 
 			this.loadProfileInfo(function() {
 				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
@@ -164,7 +164,7 @@ var CommentBox = React.createClass({
 
 				that.userdb.child(newComment.author).once("value", function(user) {
 
-					// Add to array of comments 
+					// Add to array of comments
 					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
 
 					that.state.comments.sort(function(a,b) {
@@ -302,30 +302,30 @@ var Navbar = React.createClass({
 		return {
 		};
 	},
-    render: function () {
-        return (
-            <div className="navbar navbar-default navbar-fixed-top">
-                <div className="container">
-                    <div className="navbar-header">
-                        <img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
-                    </div>
+	render: function () {
+		return (
+			<div className="navbar navbar-default navbar-fixed-top">
+				<div className="container">
+					<div className="navbar-header">
+						<img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
+					</div>
 					<div className="navbar-title">
-                        <h1>LiveMixr</h1>
-                    </div>
-                    <div className="navbar-user">
-                    {(this.props.authed == true
-				        ? 
-				          <div>
-				          	<img alt={this.props.user.name} src={this.props.user.image}/>
-				          	<span className="name">{this.props.user.name}</span> 
-				          </div>
-				        : false
-				    )}
-                    </div>
-                </div>
-            </div>
-        )
-    }
+						<h1>LiveMixr</h1>
+					</div>
+					<div className="navbar-user">
+						{(this.props.authed == true
+								?
+								<div>
+									<img alt={this.props.user.name} src={this.props.user.image}/>
+									<span className="name">{this.props.user.name}</span>
+								</div>
+								: false
+						)}
+					</div>
+				</div>
+			</div>
+		)
+	}
 });
 
 var If = React.createClass({
@@ -354,10 +354,10 @@ var MainPage = React.createClass({
 			<div>
 				<Navbar user={this.state.userParams} authed={this.state.isAuthd}/>
 				<If test={!this.state.isAuthd}>
-				<Oauth setAuthStatus={this.setAuthStatus}/>
+					<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
+					<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
 				</If>
 			</div>
 		)
@@ -437,6 +437,7 @@ var QueuePane = React.createClass({
 			that.setState({queue: queue})
 		})
 	},
+
 	render: function() {
 		return (
 			<div className="pane queue-pane">
@@ -492,6 +493,7 @@ var QueueWrapper = React.createClass({
 	}
 });
 
+
 var QueueItem = React.createClass({
 	render: function() {
 		return (
@@ -509,6 +511,72 @@ var UserComponent = React.createClass({
 });
 
 var PlayBar = React.createClass({
+	getInitialState: function() {
+		this.returnCurrentSong();
+		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
+	},
+
+
+	setSong: function() {
+		SC.initialize({
+			client_id: '562a196f46a9c2241f185373ee32d44a',
+			redirect_uri: 'http://livemixr.azurewebsites.net/'
+		});
+
+		var player = SC.stream('/tracks/' + currSong.id).then(function (player) {
+			player.seek(currSong.time);
+			player.play();
+			console.log(player);
+		});
+	},
+
+	muteSong: function() {
+		player.setVolume(0);
+	},
+
+	unMuteSong: function() {
+		player.setVolume(1);
+	},
+
+	voteUp: function() {
+		console.log("fix this");
+	},
+
+	voteDown: function() {
+		console.log("fix this too");
+	},
+
+	returnCurrentSong: function() {
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var that = this;
+		queue.on("value", function(payload) {
+			var queue = [];
+			payload.forEach(function(data){
+				queue.push(data);
+			});
+			queue.sort(function(a,b){
+				return a.date > b.date
+			});
+
+			var request = new XMLHttpRequest();
+			request.open('GET', 'https://api.soundcloud.com/tracks/' + queue[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+			request.onload = function() {
+				if (request.status >= 200 && request.status < 400) {
+					var data = JSON.parse(request.responseText);
+					that.setState({title:data.title,artist:data.user.username,cover:data.artwork_url})
+				} else {
+					//handle failure from server
+				}
+			};
+
+			request.onerror = function() {
+				//connection problem
+			};
+
+			request.send();
+		})
+	},
+
 
 	render: function() {
 		return (
@@ -531,12 +599,12 @@ var PlayBar = React.createClass({
 	}
 });
 
-var CounterComponent = React.createClass({
+	var CounterComponent = React.createClass({
 	updateSkip: function(){
-		//If the user has not tried to skip this song yet, increment his counter.
+	//If the user has not tried to skip this song yet, increment his counter.
 		console.log("TEST")
 	},
-	render: function() {
+		render: function() {
 		return (
 			<div>
 				<div className="skip-counter">Counter</div>
