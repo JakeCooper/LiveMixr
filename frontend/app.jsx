@@ -153,8 +153,37 @@ var CommentBox = React.createClass({
 		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
+		var that = this;
+		var first = true;
+
+		this.commentdb.limitToLast(5).once("value", function(comments) {
+
+			comments.forEach(function(comment) {
+
+				var newComment = comment.val();
+
+				that.userdb.child(newComment.author).once("value", function(user) {
+
+					// Add to array of comments 
+					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
+
+					that.state.comments.sort(function(a,b) {
+						return a.timestamp > b.timestamp;
+					});
+
+					// Set new comment state
+					that.setState({comments: that.state.comments});
+				});
+			});
+		});
+
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+		this.commentdb.limitToLast(1).on("child_added", function(snapshot, prevKey) {
+
+			if(first == true) {
+				first = false;
+				return;
+			}
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -163,10 +192,6 @@ var CommentBox = React.createClass({
 
 				// Add to array of comments 
 				that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
-
-				that.state.comments.sort(function(a,b) {
-					return a.timestamp > b.timestamp;
-				});
 
 				// Set new comment state
 				that.setState({comments: that.state.comments});
