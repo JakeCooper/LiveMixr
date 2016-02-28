@@ -1,0 +1,24 @@
+.container-explore {
+  padding: $navbar-height + $border-radius-base 0 $playbar-height + $border-radius-base 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.pane {
+  padding: $padding-large-vertical $padding-large-horizontal;
+  height: 100%;
+
+  &.chat-pane {
+    @extend .col-md-3;
+    border-left: solid $border-radius-base $gray-lighter;
+  }
+  &.queue-pane {
+    @extend .col-md-3;
+    border-left: solid $border-radius-base $gray-lighter;
+  }
+
+  &.browse-pane {
+    @extend .col-md-6;
+  }
+}

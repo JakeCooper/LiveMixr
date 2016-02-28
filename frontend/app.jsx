@@ -259,13 +259,18 @@ var Navbar = React.createClass({
             <div className="navbar navbar-default navbar-fixed-top">
                 <div className="container">
                     <div className="navbar-header">
-                        <a href="#" className="navbar-brand">
-                            <img src="img/LiveMixr-Logo.svg"/>
-                        </a>
+                        <img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
                     </div>
-                    <div className="nav navbar-nav navbar-right">
+					<div className="navbar-title">
+                        <h1>LiveMixr</h1>
+                    </div>
+                    <div className="navbar-user">
                     {(this.props.authed == true
-				        ? <div><img src={this.props.user.image}/>{this.props.user.name}</div>     
+				        ? 
+				          <div>
+				          	<img alt={this.props.user.name} src={this.props.user.image}/>
+				          	<span className="name">{this.props.user.name}</span> 
+				          </div>
 				        : false
 				    )}
                     </div>
@@ -316,11 +321,11 @@ var MainPage = React.createClass({
 var Explore = React.createClass({
 	render: function() {
 		return (
-			<div className="explore-pane">
+			<div className="container container-explore">
 				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
 				<QueuePane/>
-				<PlayerComponent/>
+				<PlayBar/>
 			</div>
 		)
 	}
@@ -329,7 +334,9 @@ var Explore = React.createClass({
 var ChatPane = React.createClass({
 	render: function() {
 		return (
-			<CommentBox user={this.props.user}/>
+			<div className="pane chat-pane">
+				<CommentBox user={this.props.user}/>
+			</div>
 		)
 	}
 });
@@ -337,7 +344,7 @@ var ChatPane = React.createClass({
 var BrowsePane = React.createClass({
 	render: function() {
 		return (
-			<div>BrowsePane</div>
+			<div className="pane browse-pane">BrowsePane</div>
 		)
 	}
 });
@@ -345,7 +352,7 @@ var BrowsePane = React.createClass({
 var QueuePane = React.createClass({
 	render: function() {
 		return (
-			<div>QueuePane</div>
+			<div className="pane queue-pane">QueuePane</div>
 		)
 	}
 });
@@ -358,11 +365,11 @@ var UserComponent = React.createClass({
 	}
 });
 
-var PlayerComponent = React.createClass({
+var PlayBar = React.createClass({
 
 	render: function() {
 		return (
-			<div className="player-component">
+			<div className="playbar">
 				<img className="album-art" src="/images/album.jpg"/>
 				<div className="album-name">Nickelback</div>
 				<div className="song-name">Here and Now - Take me back</div>
