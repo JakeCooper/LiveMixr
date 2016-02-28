@@ -577,7 +577,7 @@ var SearchBox = React.createClass({
 
 			// find all sounds of buskers licensed under 'creative commons share alike'
 			SC.get('/tracks', {
-				q: that.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
+				q: that.refs.searchtext.getDOMNode().value
 			}).then(function(tracks) {
 				that.setState({items: tracks});
 			});
@@ -611,16 +611,6 @@ var SearchBox = React.createClass({
 		)
 	}
 })
-//
-//var SearchResults = React.createClass({
-//	handleSearch: function() {
-//		console.out("TEST");
-//	},
-//
-//	render: function() {
-//		<div className="search-results">handleSearch</div>
-//	}
-//})
 
 var UserComponent = React.createClass({
 	render: function() {
@@ -631,8 +621,8 @@ var UserComponent = React.createClass({
 });
 
 var PlayBar = React.createClass({
-	getInitialState: function() {
 
+	getInitialState: function() {
 		return {
 			listeners: 0
 		}
@@ -648,21 +638,26 @@ var PlayBar = React.createClass({
 		socket.emit('getusercount');
 
 		this.returnCurrentSong();
+
+        this.setSong();
+
 		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
 	},
 
-
 	setSong: function() {
-		SC.initialize({
-			client_id: '562a196f46a9c2241f185373ee32d44a',
-			redirect_uri: 'http://livemixr.azurewebsites.net/'
-		});
+        this.returnCurrentSong(function(data){
+            console.log(data);
+            SC.initialize({
+                client_id: '562a196f46a9c2241f185373ee32d44a',
+                redirect_uri: 'http://livemixr.azurewebsites.net/'
+            });
 
-		var player = SC.stream('/tracks/' + currSong.id).then(function (player) {
-			player.seek(currSong.time);
-			player.play();
-			console.log(player);
-		});
+            var player = SC.stream('/tracks/' + data.id).then(function (player) {
+                player.seek(data.time);
+                player.play();
+                console.log(player);
+            });
+        });
 	},
 
 	muteSong: function() {
@@ -681,7 +676,8 @@ var PlayBar = React.createClass({
 		console.log("fix this too");
 	},
 
-	returnCurrentSong: function() {
+	returnCurrentSong: function(callback) {
+        callback = callback || function() {return false};
 		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
 		var that = this;
 		queue.on("value", function(payload) {
@@ -699,7 +695,8 @@ var PlayBar = React.createClass({
 				if (request.status >= 200 && request.status < 400) {
 					var data = JSON.parse(request.responseText);
 					that.setState({title:data.title,artist:data.user.username,cover:data.artwork_url})
-				} else {
+				    callback(data);
+                } else {
 					//handle failure from server
 				}
 			};
