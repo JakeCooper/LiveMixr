@@ -153,10 +153,8 @@ var CommentBox = React.createClass({
 		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
-
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.orderByChild("timestamp").limitToLast(5).on("child_added", function(snapshot, prevKey) {
-
+		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -189,9 +187,7 @@ var CommentBox = React.createClass({
 	},
 	render: function() {
 		return (
-			<div className="commentBox">
-				<h2>Hello {this.props.user.name}</h2>
-				<h3>Comments:</h3>
+			<div>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
 			</div>
@@ -200,6 +196,16 @@ var CommentBox = React.createClass({
 });
 
 var CommentList = React.createClass({
+    componentWillUpdate: function() {
+        var node = this.getDOMNode();
+        this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+    },
+    componentDidUpdate: function() {
+        if (this.shouldScrollBottom) {
+            var node = this.getDOMNode();
+            node.scrollTop = node.scrollHeight
+        }
+    },
     render: function () {
         var Comments = (<div>Loading comments...</div>);
         if (this.props.comments) {
@@ -208,7 +214,7 @@ var CommentList = React.createClass({
             });
         }
         return (
-            <div className="commentList">
+            <div className="message-list">
                 {Comments}
             </div>
         );
@@ -217,10 +223,14 @@ var CommentList = React.createClass({
 var Comment = React.createClass({
     render: function () {
         return (
-            <div className="comment">
-            	<span className="author-pic"><img src={this.props.comment.image}/></span>
-                <span className="author">{this.props.comment.author}</span> said:<br/>
-                <div className="body">{this.props.comment.text}</div>
+            <div className="message">
+                <div className="profile">
+                    <img src={this.props.comment.image}/>
+                </div>
+                <div className="content">
+                    <span className="author">{this.props.comment.author}</span>
+                    <div className="body">{this.props.comment.text}</div>
+                </div>
             </div>
         );
     }
@@ -231,22 +241,31 @@ var CommentForm = React.createClass({
         var that = this;
         //var author = this.refs.author.getDOMNode().value;
         var text = this.refs.text.getDOMNode().value;
+        if (text == "") return;
         //var comment = {author: author, text: text};
-        var submitButton = this.refs.submitButton.getDOMNode();
-        submitButton.innerHTML = 'Posting comment...';
+        var submitButton = this.refs.submit.getDOMNode();
         submitButton.setAttribute('disabled', 'disabled');
         this.props.submitComment(text, function (err) {
             that.refs.text.getDOMNode().value = '';
-            submitButton.innerHTML = 'Post comment';
             submitButton.removeAttribute('disabled');
         });
     },
     render: function () {
         return (
-            <div>
-                <form className="commentForm" onSubmit={this.handleSubmit}>
-                    <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-                    <button type="submit" ref="submitButton">Post comment</button>
+            <div className="message-form">
+                <form onSubmit={this.handleSubmit}>
+                    <div className="message-box">
+                        <input type="text"
+                               ref="text"
+                               className="form-control"
+                               placeholder="Send a Message"
+                               maxLength="200"/>
+                    </div>
+                    <div className="message-button">
+                        <button ref="submit" type="submit" className="btn btn-primary">
+                            <i className='fa fa-paper-plane'></i>
+                        </button>
+                    </div>
                 </form>
             </div>
         );
@@ -313,7 +332,7 @@ var MainPage = React.createClass({
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore user={this.state.userParams}/>
+				<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
 				</If>
 			</div>
 		)
@@ -326,7 +345,7 @@ var Explore = React.createClass({
 			<div className="container container-explore">
 				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
-				<QueuePane/>
+				<QueuePane isAuthd={this.props.isAuthd}/>
 				<PlayBar/>
 			</div>
 		)
@@ -352,9 +371,106 @@ var BrowsePane = React.createClass({
 });
 
 var QueuePane = React.createClass({
+	getInitialState: function() {
+		return {queue: []}
+	},
+	queueAppend: function(songUrl) {
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		queue.push({APIref: songUrl, date: Date.now()})
+	},
+
+	queueDeque: function() {
+		//call dequeue the most recent song. Call after done playing
+		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		fireQueue.on("value", function(payload) {
+			var queue = [];
+			Object.keys(payload.val()).map(function(data){
+				queue.push(payload.val()[data])
+			});
+			Object.keys(payload.val()).map(function(data,index){
+				queue[index]["key"] = data
+			});
+			queue.sort(function(a,b) {
+				return a.date > b.date;
+			});
+			fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/' + queue[0]["key"]);
+			fireQueue.remove();
+		})
+	},
+
+	returnOrderedQueue: function(callback) {
+		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var that = this;
+		fireQueue.on("value", function(payload) {
+			var queue = [];
+			payload.forEach(function(data){
+				queue.push(data.val())
+			});
+			queue.sort(function(a,b) {
+				return a.date > b.date;
+			});
+			that.setState({queue: queue})
+		})
+	},
 	render: function() {
 		return (
-			<div className="pane queue-pane">QueuePane</div>
+			<div className="pane queue-pane">
+				{(this.state.queue.length == 0)
+					? this.returnOrderedQueue()
+					: false
+				}
+				{this.state.queue.map(function(item) {
+					return <QueueWrapper APIref={item.APIref}/>
+				})}
+			</div>
+		)
+	}
+});
+
+var QueueWrapper = React.createClass({
+	getInitialState: function() {
+		return {song: {}, requested: false}
+	},
+	ComponentShouldUpdate: function() {
+		return (Object.keys(this.state.song).length == 0 || !this.state.requested )
+	},
+
+	getSongInfo: function(songId, callback) {
+		var request = new XMLHttpRequest();
+		request.open('GET', 'https://api.soundcloud.com/tracks/' + songId + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+		var that = this;
+		request.onload = function() {
+			if (request.status >= 200 && request.status < 400) {
+				var data = JSON.parse(request.responseText);
+				that.setState({song:data, requested:true})
+			} else {
+				//handle failure from server
+			}
+		};
+
+		request.onerror = function() {
+			//connection problem
+		};
+
+		request.send();
+	},
+
+	render: function() {
+		return (
+			<div className="queue-item">
+				{(Object.keys(this.state.song)).length > 0
+					? <QueueItem songInfo={this.state.song}/>
+					: this.getSongInfo(this.props.APIref)
+				}
+			</div>
+		)
+	}
+});
+
+var QueueItem = React.createClass({
+	render: function() {
+		return (
+			<div>{this.props.songInfo.title}</div>
 		)
 	}
 });
@@ -371,12 +487,21 @@ var PlayBar = React.createClass({
 
 	render: function() {
 		return (
-			<div className="playbar">
-				<img className="album-art" src="/images/album.jpg"/>
-				<div className="album-name">Nickelback</div>
-				<div className="song-name">Here and Now - Take me back</div>
-				<CounterComponent/>
-			</div>
+            <div className="playbar">
+                <div className="song-progress">
+                    <div className="song-progress-complete"></div>
+                </div>
+                <div className="content">
+                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
+                    <div className="wrapper">
+                        <div className="info">
+                            <p className="song">Take me back</p>
+                            <p className="artist-album">Nickelback - Here and Now</p>
+                        </div>
+                        <CounterComponent/>
+                    </div>
+                </div>
+            </div>
 		)
 	}
 });
@@ -390,7 +515,7 @@ var CounterComponent = React.createClass({
 		return (
 			<div>
 				<div className="skip-counter">Counter</div>
-				<button className="btn btn-default skip-button" onClick={this.updateSkip}>Skip</button>
+				<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
 			</div>
 			)
 	}
