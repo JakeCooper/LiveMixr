@@ -464,21 +464,54 @@ var BrowsePane = React.createClass({
 });
 
 var BrowseItem = React.createClass({
+    getInitialState: function() {
+        return {added: false}
+    },
     message: function(id) {
 
         // Adds the track ID to queue
         var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
         queue.push({APIref: id, date: Date.now()});
-
-        this.props.owner.reset();
+        this.setState({ added: true });
     },
     render: function() {
+        var added = this.state.added;
+        var track = this.props.track;
+        var button = {
+            icon: 'fa fa-' + (added ? 'check' : 'plus'),
+            text: added ? 'Added to Queue' : 'Add to Queue',
+            class: 'btn btn-default' + (added ? " disabled" : "")
+        };
         return (
-
             <span>
-			{(this.props.track || false) ?
-                <div className="browse-item" onClick={this.message.bind(this, this.props.track.id)}>
-                    {this.props.track.title}
+			{(track || false) ?
+                <div className="browse-song">
+                    <div className="album-art">
+                        <img src={track.artwork_url || "/img/Album-Placeholder.svg"}/>
+                    </div>
+                    <div className="content">
+                        <div className="info">
+                            <div className="title">
+                                <a href={track.permalink_url} target="_blank">
+                                    {track.title}
+                                </a>
+                            </div>
+                            <div className="user">
+                                <a href={track.user.permalink_url} target="_blank">
+                                    {track.user.username}
+                                </a>
+                            </div>
+                            <div className="description">
+                                {track.description}
+                            </div>
+                            <div className="controls">
+                                <button className={button.class} disabled={added}
+                                        onClick={!added ? this.message.bind(this, track.id) : null}>
+                                    <i className={button.icon}/> {button.text}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 : false}
 			</span>

@@ -21,4 +21,48 @@
       }
     }
   }
+
+  .browse-song {
+    min-height: $browse-album-height;
+    margin: 2*$padding-large-vertical $padding-large-horizontal;
+
+    .album-art {
+      float: left;
+      width: $browse-album-height;
+      img {
+        width: 100%;
+        border-radius: $border-radius-base;
+      }
+    }
+    .content {
+      margin-left: $browse-album-height;
+
+      padding: 0 $padding-large-horizontal;
+
+      .title {
+        font-weight: bold;
+        font-size: $font-size-large;
+
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .user {
+        padding-bottom: $padding-base-vertical;
+      }
+      .controls {
+        padding: $padding-base-vertical $padding-base-horizontal;
+        text-align: right;
+      }
+      a {
+        color: $text-color;
+        &:hover, &:focus {
+          color: $text-color;
+        }
+        &:focus {
+          text-decoration: none;
+        }
+      }
+    }
+  }
 }
