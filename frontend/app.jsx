@@ -1,4 +1,4 @@
-var MainPage = React.createClass({
+var Oauth = React.createClass({
 	getInitialState: function () {
 		return {
 			RedirectURL: "http://livemixr.azurewebsites.net/",
@@ -131,6 +131,27 @@ var CommentForm = React.createClass({
 				</form>
 			</div>
 		);
+	}
+});
+
+var Navbar = React.createClass({
+	render: function() {
+		return (
+			<div className="navbar navbar-default">
+				I am a navbar
+			</div>
+		)
+	}
+});
+
+var MainPage = React.createClass({
+	render: function() {
+		return (
+			<div>
+				<Navbar/>
+				<Oauth/>
+			</div>
+		)
 	}
 });
 
