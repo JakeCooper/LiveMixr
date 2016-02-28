@@ -637,6 +637,10 @@ var PlayBar = React.createClass({
 
 		socket.emit('getusercount');
 
+		socket.on('playnextsong', function() {
+			that.setSong();
+		});
+
 		this.returnCurrentSong();
 
         this.setSong();
@@ -645,6 +649,9 @@ var PlayBar = React.createClass({
 	},
 
 	setSong: function() {
+
+
+
         this.returnCurrentSong(function(data){
             console.log(data);
             SC.initialize({
