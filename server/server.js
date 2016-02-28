@@ -80,11 +80,12 @@ var PlayNextSong = function() {
 	if(songTimer != undefined)
 		clearTimeout(songTimer);
 
+	skippers = [];
+
 	if(allSongs.length == 0) {
 
 		currentSong = undefined;
 		songFinish = undefined;
-		skippers = [];
 		console.log("no more songs left");
 
 		return;
@@ -151,7 +152,7 @@ io.on('connection', function (socket) {
 
 	var sendSkipCount = function() {
 
-		io.sockets.emit('getskipcount', skippers.length);
+		io.sockets.emit('updateskipcount', skippers.length);
 	};
 
 	var checkSkipPossible = function() {
@@ -185,7 +186,12 @@ io.on('connection', function (socket) {
 
 	socket.on('skipsong', function(user_id) {
 
-		if(skippers.indexOf(user_id) != -1) {
+		if(user_id == undefined)
+			return;
+
+		console.log("skippers " + user_id);
+
+		if(skippers.indexOf(user_id) == -1) {
 
 			skippers.push(user_id);
 
