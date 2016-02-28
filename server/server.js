@@ -103,6 +103,11 @@ var PlayNextSong = function() {
 
 	console.log("playing song " + currentSong);
 
+	sessions.forEach(function(sess) {
+
+		sess.emit("playnextsong");
+	});
+
 	songTimer = setTimeout(function() {
 
 		PlayNextSong();
