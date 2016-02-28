@@ -23,6 +23,16 @@
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+
+      }
+      a {
+        color: #fff;
+        &:hover, &:focus {
+          color: #fff;
+        }
+        &:focus {
+          text-decoration: none;
+        }
       }
     }
   }

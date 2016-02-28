@@ -156,7 +156,7 @@ var CommentBox = React.createClass({
 		var that = this;
 		var first = true;
 
-		this.commentdb.limitToLast(5).once("value", function(comments) {
+		this.commentdb.limitToLast(20).once("value", function(comments) {
 
 			comments.forEach(function(comment) {
 
@@ -184,7 +184,6 @@ var CommentBox = React.createClass({
 				first = false;
 				return;
 			}
-
 			var newComment = snapshot.val();
 			var that = this;
 
@@ -504,8 +503,16 @@ var QueueItem = React.createClass({
                 </div>
                 <div className="content">
                     <div className="info">
-                        <div className="title">{this.props.songInfo.title}</div>
-                        <div className="user">{this.props.songInfo.user.username}</div>
+                        <div className="title">
+                            <a href={this.props.songInfo.permalink_url} target="_blank">
+                                {this.props.songInfo.title}
+                            </a>
+                        </div>
+                        <div className="user">
+                            <a href={this.props.songInfo.user.permalink_url} target="_blank">
+                                {this.props.songInfo.user.username}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
