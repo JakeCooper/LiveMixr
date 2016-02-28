@@ -1,0 +1,23 @@
+.player-component {
+  position:fixed;
+  bottom: 0px;
+  border: 1px solid black;
+  width: 100%;
+  .album-art {
+    width: 7%;
+    float:left;
+  }
+  .album-name {
+    margin-top: 1.6%;
+    margin-bottom: 1%;
+    margin-left: 10%;
+  }
+  .song-name {
+    margin-left: 10%;
+  }
+  .skip-button {
+    position:fixed;
+    margin-left: 45%;
+    margin-top: -3%;
+  }
+}
