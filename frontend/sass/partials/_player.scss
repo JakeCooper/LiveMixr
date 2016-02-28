@@ -1,8 +1,12 @@
-.player-component {
+.playbar {
   position:fixed;
   bottom: 0px;
+
+  height: $playbar-height;
+
   border: 1px solid black;
   width: 100%;
+
   .album-art {
     width: 7%;
     float:left;
