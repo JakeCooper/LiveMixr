@@ -8,6 +8,8 @@
     max-height: 100%;
     width: 100%;
 
+    padding-bottom: 64px;
+
     overflow-y: auto;
 
     .message {
@@ -45,5 +47,24 @@
     width: 100%;
 
     padding: $padding-large-vertical $padding-large-horizontal;
+
+    .message-box {
+      @extend .col-xs-9;
+      height: 38px;
+      padding: 0;
+    }
+    .message-button {
+      @extend .col-xs-3;
+      height: 38px;
+      padding-right: 0;
+
+      & > button {
+        @extend .btn;
+        @extend .btn-primary;
+        @extend .btn-block;
+
+        height: 100%;
+      }
+    }
   }
 }

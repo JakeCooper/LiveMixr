@@ -249,9 +249,11 @@ var CommentForm = React.createClass({
                                placeholder="Send a Message"
                                maxlength="200"/>
                     </div>
-                    <button type="submit" className="btn btn-default">
-                        <i className='fa fa-paper-plane'></i>
-                    </button>
+                    <div className="message-button">
+                        <button type="submit" className="btn btn-primary">
+                            <i className='fa fa-paper-plane'></i>
+                        </button>
+                    </div>
                 </form>
             </div>
         );
