@@ -324,9 +324,8 @@ var Explore = React.createClass({
 			<div className="container container-explore">
 				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
-				<QueuePane/>
-				<PlayBar/>
 				<QueuePane isAuthd={this.props.isAuthd}/>
+				<PlayBar/>
 			</div>
 		)
 	}
@@ -384,6 +383,8 @@ var QueuePane = React.createClass({
 		)
 	}
 });
+
+
 
 var QueueItem = React.createClass({
 	render: function() {
