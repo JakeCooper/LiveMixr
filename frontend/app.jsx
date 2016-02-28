@@ -505,12 +505,14 @@ var QueueItem = React.createClass({
 });
 
 var SearchBox = React.createClass({
+	getInitialState: function() {
+		return {items: []}
+	},
 	handleChange: function(sel) {
-		console.log(sel);
+		//console.log(sel);
 		clearTimeout(timeout);
+		var that = this;
 		var timeout = setTimeout(function() {
-			var value = sel.target.value;
-
 
 			SC.initialize({
 				client_id: '562a196f46a9c2241f185373ee32d44a'
@@ -518,12 +520,11 @@ var SearchBox = React.createClass({
 
 			// find all sounds of buskers licensed under 'creative commons share alike'
 			SC.get('/tracks', {
-				q: sel.val, license: 'cc-by-sa'
+				q: that.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
 			}).then(function(tracks) {
-				console.log("here");
-				console.log(tracks);
+				that.setState({items: tracks});
 			});
-		},500).bind(this);
+		},500);
 
 	},
 
@@ -531,9 +532,18 @@ var SearchBox = React.createClass({
 		return (
 			<form className="navbar-form navbar-left" role="search">
 				<div className="form-group">
-					<input type="text" onChange={this.handleChange.bind(this)} className="form-control" placeholder="Search"/>
+					<input type="text" ref="searchtext" onChange={this.handleChange} className="form-control" placeholder="Search"/>
 				</div>
 				<button type="submit" className="btn btn-default">Submit</button>
+				<div>
+					{this.state.items.map(function(track, i) {
+						return (
+							<div>
+								{track.title}
+							</div>
+						);	
+					})}
+				</div>
 			</form>
 		)
 	}
