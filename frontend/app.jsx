@@ -421,7 +421,7 @@ var BrowsePane = React.createClass({
         this.setState({ searching: true});
         // find all sounds of buskers licensed under 'creative commons share alike'
         SC.get('/tracks', {
-            q: this.state.search, license: 'cc-by-sa'
+            q: this.state.search
         }).then(function(tracks) {
             that.setState({items: []});
             that.setState({ items: tracks, searching: false });
