@@ -156,7 +156,7 @@ var CommentBox = React.createClass({
 		var that = this;
 		var first = true;
 
-		this.commentdb.limitToLast(5).once("value", function(comments) {
+		this.commentdb.limitToLast(20).once("value", function(comments) {
 
 			comments.forEach(function(comment) {
 
@@ -184,7 +184,6 @@ var CommentBox = React.createClass({
 				first = false;
 				return;
 			}
-
 			var newComment = snapshot.val();
 			var that = this;
 
@@ -498,8 +497,26 @@ var QueueWrapper = React.createClass({
 var QueueItem = React.createClass({
 	render: function() {
 		return (
-			<div>{this.props.songInfo.title}</div>
-		)
+            <div className="queue-song panel panel-default">
+                <div className="album-art">
+                    <img src={this.props.songInfo.artwork_url || "/img/Album-Placeholder.svg"}/>
+                </div>
+                <div className="content">
+                    <div className="info">
+                        <div className="title">
+                            <a href={this.props.songInfo.permalink_url} target="_blank">
+                                {this.props.songInfo.title}
+                            </a>
+                        </div>
+                        <div className="user">
+                            <a href={this.props.songInfo.user.permalink_url} target="_blank">
+                                {this.props.songInfo.user.username}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
 	}
 });
 
@@ -562,13 +579,13 @@ var SearchBox = React.createClass({
 				</div>
 				<button type="submit" className="btn btn-default">Submit</button>
 				<div>
-					
+
 					{this.state.items.map(function(track, i) {
 						return (
 							<div>
 								<SearchItem track={track} owner={this}/>
 							</div>
-						);	
+						);
 					}.bind(this))}
 				</div>
 			</form>
