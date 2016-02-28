@@ -6,9 +6,14 @@ var express = require('express');
 var app = express();
 app.use('/', express.static(path.join(__dirname, '../frontend')));
 
+app.get('/testing', function(req,res) {
+
+});
+
 var port = normalizePort(process.env.PORT || '4000');
 
 var server = app.listen(port);
+
 server.on('error', onError);
 
 function onError(error) {
