@@ -2,11 +2,11 @@
   "name": "livemixr",
   "version": "1.0.0",
   "description": "LiveMixr",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server/index.js",
-    "prod": "export PORT=80 && node server/index.js"
+    "start": "nodemon server/server.js",
+    "prod": "export PORT=80 && nodemon server/server.js"
   },
   "repository": {
     "type": "git",
