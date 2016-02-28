@@ -20,7 +20,8 @@
   }
   &.queue-pane {
     @extend .col-md-3;
-    border-left: solid $border-radius-base $gray-lighter;
+    background: lighten($gray,10%);
+    border-left: solid $border-radius-base $gray;
   }
 
   &.browse-pane {

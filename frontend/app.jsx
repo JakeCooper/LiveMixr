@@ -44,7 +44,7 @@ var Oauth = React.createClass({
 		this.SigninData.immediate = false;
 
 		// lol good luck
-		gapi.auth.authorize( 
+		gapi.auth.authorize(
 			this.SigninData,
 			this.onAuthCallback
 		);
@@ -57,7 +57,7 @@ var Oauth = React.createClass({
 
 		if (AuthResult && !AuthResult.error) {
 
-            var that = this;
+			var that = this;
 
 			this.loadProfileInfo(function() {
 				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
@@ -162,7 +162,7 @@ var CommentBox = React.createClass({
 		var that = this;
 		var first = true;
 
-		this.commentdb.limitToLast(5).once("value", function(comments) {
+		this.commentdb.limitToLast(20).once("value", function(comments) {
 
 			comments.forEach(function(comment) {
 
@@ -170,7 +170,7 @@ var CommentBox = React.createClass({
 
 				that.userdb.child(newComment.author).once("value", function(user) {
 
-					// Add to array of comments 
+					// Add to array of comments
 					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
 
 					that.state.comments.sort(function(a,b) {
@@ -190,7 +190,6 @@ var CommentBox = React.createClass({
 				first = false;
 				return;
 			}
-
 			var newComment = snapshot.val();
 			var that = this;
 
@@ -308,30 +307,30 @@ var Navbar = React.createClass({
 		return {
 		};
 	},
-    render: function () {
-        return (
-            <div className="navbar navbar-default navbar-fixed-top">
-                <div className="container">
-                    <div className="navbar-header">
-                        <img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
-                    </div>
+	render: function () {
+		return (
+			<div className="navbar navbar-default navbar-fixed-top">
+				<div className="container">
+					<div className="navbar-header">
+						<img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
+					</div>
 					<div className="navbar-title">
-                        <h1>LiveMixr</h1>
-                    </div>
-                    <div className="navbar-user">
-                    {(this.props.authed == true
-				        ? 
-				          <div>
-				          	<img alt={this.props.user.name} src={this.props.user.image}/>
-				          	<span className="name">{this.props.user.name}</span> 
-				          </div>
-				        : false
-				    )}
-                    </div>
-                </div>
-            </div>
-        )
-    }
+						<h1>LiveMixr</h1>
+					</div>
+					<div className="navbar-user">
+						{(this.props.authed == true
+								?
+								<div>
+									<img alt={this.props.user.name} src={this.props.user.image}/>
+									<span className="name">{this.props.user.name}</span>
+								</div>
+								: false
+						)}
+					</div>
+				</div>
+			</div>
+		)
+	}
 });
 
 var If = React.createClass({
@@ -360,10 +359,10 @@ var MainPage = React.createClass({
 			<div>
 				<Navbar user={this.state.userParams} authed={this.state.isAuthd}/>
 				<If test={!this.state.isAuthd}>
-				<Oauth setAuthStatus={this.setAuthStatus}/>
+					<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
+					<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
 				</If>
 			</div>
 		)
@@ -396,7 +395,9 @@ var ChatPane = React.createClass({
 var BrowsePane = React.createClass({
 	render: function() {
 		return (
-			<div className="pane browse-pane">BrowsePane</div>
+			<div className="pane browse-pane">
+				<SearchBox/>
+			</div>
 		)
 	}
 });
@@ -443,6 +444,7 @@ var QueuePane = React.createClass({
 			that.setState({queue: queue})
 		})
 	},
+
 	render: function() {
 		return (
 			<div className="pane queue-pane">
@@ -501,10 +503,124 @@ var QueueWrapper = React.createClass({
 var QueueItem = React.createClass({
 	render: function() {
 		return (
-			<div>{this.props.songInfo.title}</div>
+            <div className="queue-song panel panel-default">
+                <div className="album-art">
+                    <img src={this.props.songInfo.artwork_url || "/img/Album-Placeholder.svg"}/>
+                </div>
+                <div className="content">
+                    <div className="info">
+                        <div className="title">
+                            <a href={this.props.songInfo.permalink_url} target="_blank">
+                                {this.props.songInfo.title}
+                            </a>
+                        </div>
+                        <div className="user">
+                            <a href={this.props.songInfo.user.permalink_url} target="_blank">
+                                {this.props.songInfo.user.username}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+	}
+});
+
+
+
+var SearchItem = React.createClass({
+	message: function(id) {
+
+		// Adds the track ID to queue
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var request = new XMLHttpRequest();
+		request.open('GET', 'https://api.soundcloud.com/tracks/' + id + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+		request.onload = function() {
+			if (request.status >= 200 && request.status < 400) {
+				var data = JSON.parse(request.responseText);
+				queue.push({APIref: id, date: Date.now(),length:data.duration});
+			} else {
+				//handle failure from server
+			}
+		};
+
+		request.onerror = function() {
+			//connection problem
+		};
+
+		request.send();
+		this.props.owner.reset();
+	},
+	render: function() {
+		return (
+			<span>
+			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
+			</span>
 		)
 	}
 });
+
+var SearchBox = React.createClass({
+	getInitialState: function() {
+		return {items: []}
+	},
+	handleChange: function(sel) {
+		//console.log(sel);
+		var that = this;
+		this.reset();
+		clearTimeout(this.timeout);
+		this.timeout = setTimeout(function() {
+
+			SC.initialize({
+				client_id: '562a196f46a9c2241f185373ee32d44a'
+			});
+
+			// find all sounds of buskers licensed under 'creative commons share alike'
+			SC.get('/tracks', {
+				q: that.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
+			}).then(function(tracks) {
+				that.setState({items: tracks});
+			});
+		},500);
+
+	},
+	reset: function() {
+		this.setState({items: []});
+	},
+	appendToQueue: function() {
+		console.log("test");
+	},
+	render: function() {
+		return (
+			<form className="navbar-form navbar-left" role="search">
+				<div className="form-group">
+					<input type="text" ref="searchtext" onChange={this.handleChange} className="form-control" placeholder="Search"/>
+				</div>
+				<button type="submit" className="btn btn-default">Submit</button>
+				<div>
+
+					{this.state.items.map(function(track, i) {
+						return (
+							<div>
+								<SearchItem track={track} owner={this}/>
+							</div>
+						);
+					}.bind(this))}
+				</div>
+			</form>
+		)
+	}
+})
+//
+//var SearchResults = React.createClass({
+//	handleSearch: function() {
+//		console.out("TEST");
+//	},
+//
+//	render: function() {
+//		<div className="search-results">handleSearch</div>
+//	}
+//})
 
 var UserComponent = React.createClass({
 	render: function() {
@@ -516,6 +632,7 @@ var UserComponent = React.createClass({
 
 var PlayBar = React.createClass({
 	getInitialState: function() {
+
 		return {
 			listeners: 0
 		}
@@ -529,6 +646,70 @@ var PlayBar = React.createClass({
 		});
 
 		socket.emit('getusercount');
+
+		this.returnCurrentSong();
+		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
+	},
+
+
+	setSong: function() {
+		SC.initialize({
+			client_id: '562a196f46a9c2241f185373ee32d44a',
+			redirect_uri: 'http://livemixr.azurewebsites.net/'
+		});
+
+		var player = SC.stream('/tracks/' + currSong.id).then(function (player) {
+			player.seek(currSong.time);
+			player.play();
+			console.log(player);
+		});
+	},
+
+	muteSong: function() {
+		player.setVolume(0);
+	},
+
+	unMuteSong: function() {
+		player.setVolume(1);
+	},
+
+	voteUp: function() {
+		console.log("fix this");
+	},
+
+	voteDown: function() {
+		console.log("fix this too");
+	},
+
+	returnCurrentSong: function() {
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var that = this;
+		queue.on("value", function(payload) {
+			var queue = [];
+			payload.forEach(function(data){
+				queue.push(data);
+			});
+			queue.sort(function(a,b){
+				return a.date > b.date
+			});
+
+			var request = new XMLHttpRequest();
+			request.open('GET', 'https://api.soundcloud.com/tracks/' + queue[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+			request.onload = function() {
+				if (request.status >= 200 && request.status < 400) {
+					var data = JSON.parse(request.responseText);
+					that.setState({title:data.title,artist:data.user.username,cover:data.artwork_url})
+				} else {
+					//handle failure from server
+				}
+			};
+
+			request.onerror = function() {
+				//connection problem
+			};
+
+			request.send();
+		})
 	},
 	render: function() {
 		return (
@@ -537,11 +718,11 @@ var PlayBar = React.createClass({
                     <div className="song-progress-complete"></div>
                 </div>
                 <div className="content">
-                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
+                    <img className="album-art" src={this.state.cover}/>
                     <div className="wrapper">
                         <div className="info">
-                            <p className="song">Take me back</p>
-                            <p className="artist-album">Nickelback - Here and Now</p>
+                            <p className="song">{this.state.title}</p>
+                            <p className="artist-album">{this.state.artist}</p>
                             <div>{this.state.listeners} users listening</div>
                             <CounterComponent user={this.props.user}/>
                         </div>
@@ -567,12 +748,12 @@ var CounterComponent = React.createClass({
 		});
 	},
 	updateSkip: function(){
-		//If the user has not tried to skip this song yet, increment his counter.
+	//If the user has not tried to skip this song yet, increment his counter.
 		console.log("TEST")
 
 		socket.emit('skipsong', this.props.user.id);
 	},
-	render: function() {
+		render: function() {
 		return (
 			<span>
 				<span className="skip-counter">{this.state.skippers}</span>
