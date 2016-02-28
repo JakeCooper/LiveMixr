@@ -161,8 +161,11 @@ var CommentBox = React.createClass({
 
 			this.userdb.child(newComment.author).once("value", function(user) {
 
-				// Add to array of comments
-				that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+				// Add to array of comments 
+				if(that.state.comments.length > 4)
+					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+				else
+					that.state.comments.unshift({author: user.val().name, text: newComment.text, image: user.val().profile_url });
 
 				// Set new comment state
 				that.setState({comments: that.state.comments});
