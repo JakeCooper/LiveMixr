@@ -26,6 +26,7 @@ var Oauth = React.createClass({
 			'immediate': true // Means we want to instantly know if user is authed or not
 		};
 
+
 		gapi.auth.authorize(
 			this.SigninData,
 			this.onAuthCallback
@@ -46,8 +47,7 @@ var Oauth = React.createClass({
 
 		// This will signal to show the login bar after first auth attempt
 		// If the first auth failed, then user will have to login
-		TriedAuth = true;
-
+		this.setState({TriedAuth: true});
 
 		if (AuthResult && !AuthResult.error) {
 
@@ -69,7 +69,7 @@ var Oauth = React.createClass({
 
 			// TODO: What to do if auth fails?
 
-			this.setState({content:"Failed to login to Google+"});
+			//this.setState({content:"Failed to login to Google+"});
 		}
 	},
 	loadProfileInfo: function(callback) {
@@ -111,26 +111,28 @@ var Oauth = React.createClass({
             <div className="splash">
                 <div className="container">
                     <div className="login-wrapper">
-                        <If test={this.state.TriedAuth}>
-                            <div className="login-header">
-                                <h1>
-                                    Welcome to Mixr
-                                </h1>
-                            </div>
-                            <div className="login-description">
-                                <div>{this.state.content}</div>
-                                Mixr makes music social. Joins tens of other users voting, talking and listening to the
-                                best music on the web.
-                            </div>
-                            <div className="login-auth">
-                                <button className="btn-google" type="submit" onClick={this.onLogin}>
-                                    <i className="fa fa-google-plus"></i>
-                                    <div>
-                                        <small>Sign in with</small>
-                                        <br/>
-                                        <big>Google</big>
-                                    </div>
-                                </button>
+                    	<If test={this.state.TriedAuth}>
+                    		<div>
+	                            <div className="login-header">
+	                                <h1>
+	                                    Welcome to Mixr
+	                                </h1>
+	                            </div>
+	                            <div className="login-description">
+	                                <div>{this.state.content}</div>
+	                                Mixr makes music social. Joins tens of other users voting, talking and listening to the
+	                                best music on the web.
+	                            </div>
+	                            <div className="login-auth">
+	                                <button className="btn-google" type="submit" onClick={this.onLogin}>
+	                                    <i className="fa fa-google-plus"></i>
+	                                    <div>
+	                                        <small>Sign in with</small>
+	                                        <br/>
+	                                        <big>Google</big>
+	                                    </div>
+	                                </button>
+	                            </div>
                             </div>
                         </If>
                         <If test={!this.state.TriedAuth}>
@@ -387,11 +389,6 @@ var CounterComponent = React.createClass({
 });
 
 React.render(
-<<<<<<< HEAD
 	<MainPage/>,
 	document.body
-=======
-    <MainPage/>,
-    document.body
->>>>>>> mainpage-styling
 );
