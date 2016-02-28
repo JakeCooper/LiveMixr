@@ -77,25 +77,39 @@ var Oauth = React.createClass({
 });
 
 var CommentBox = React.createClass({
+	mixins: [ReactFireMixin],
+
 	getInitialState: function () {
 		return {
-			comments: null
+			comments: []
 		};
 	},
 	componentDidMount: function () {
-		var that = this;
-		this.socket = io();
-		this.socket.on('comments', function (comments) {
-			that.setState({ comments: comments });
-		});
-		this.socket.emit('fetchComments');
+
+		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
+
+		// Will pull the latest 5 messages, and then continue adding new messages
+		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+
+			var newComment = snapshot.val();
+
+			// Add to array of comments
+			this.state.comments.push({author: newComment.author, text: newComment.text });
+
+			// Set new comment state
+			this.setState({comments: this.state.comments});
+
+		}, function(){}, this);
 	},
 	submitComment: function (comment, callback) {
-		this.socket.emit('newComment', comment, function (err) {
-			if (err)
-				return console.error('New comment error:', err);
-			callback();
+
+		// Sends new comment to the comment db
+		this.commentdb.push({
+			author: comment.author,
+			text: comment.text
 		});
+
+		callback();
 	},
 	render: function() {
 		return (
