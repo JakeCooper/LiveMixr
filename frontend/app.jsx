@@ -441,7 +441,7 @@ var BrowsePane = React.createClass({
                 <div className="search-info search-loading">
                     <i className="fa fa-spinner fa-pulse"/>
                 </div>
-        } else if (this.state.items.length > 0){
+        } else if (this.state.items !== undefined && this.state.items.length > 0){
             tracks = this.state.items.map(function (track, i) {
                 return (<BrowseItem track={track} owner={this}/>);
             }.bind(this));
@@ -509,7 +509,7 @@ var BrowseItem = React.createClass({
         };
         return (
             <span>
-			{(track || false) ?
+			{((track && track.description !== undefined && track.description !== null && track.description.length) || false) ?
                 <div className="browse-song">
                     <div className="album-art">
                         <img src={track.artwork_url || "/img/Album-Placeholder.svg"}/>
@@ -697,8 +697,6 @@ var PlayBar = React.createClass({
 
 		socket.on('playnextsong', function(seek) {
 			that.setSong(seek);
-
-			console.log("seek " + seek);
 		});
 
 		this.returnCurrentSong();
@@ -715,17 +713,14 @@ var PlayBar = React.createClass({
 
 
         this.returnCurrentSong(function(data){
-            console.log(data);
             SC.initialize({
                 client_id: '562a196f46a9c2241f185373ee32d44a',
                 redirect_uri: 'http://livemixr.azurewebsites.net/'
             });
 
             var player = SC.stream('/tracks/' + data.id).then(function (player) {
-            	console.log("seeking " + seektime);
                 player.seek(seektime);
                 player.play();
-                console.log(player);
             });
         });
 	},
@@ -820,7 +815,6 @@ var CounterComponent = React.createClass({
 	},
 	updateSkip: function(){
 	//If the user has not tried to skip this song yet, increment his counter.
-		console.log("TEST")
 
 		socket.emit('skipsong', this.props.user.id);
 	},
