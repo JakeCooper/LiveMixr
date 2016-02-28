@@ -66,46 +66,27 @@ var db = new Firebase("https://saqaf086r05.firebaseio-demo.com");
 
 var sessions = [];
 
-io.on('connection', function (socket) {
-
-	console.log("connected user");
-
-	sessions.push(socket);
-
-	io.sockets.emit('updateusercount', sessions.length);
-
-	console.log(sessions.length);
-
-	socket.on('disconnect', function(){
-
-		console.log("disconnected user");
-
-		// Remove from 
-		sessions.splice( sessions.indexOf(socket), 1);
-
-		io.sockets.emit('updateusercount', sessions.length);
-
-		console.log(sessions.length);
-	});
-
-	socket.on('getusercount', function() {
-
-		socket.emit('updateusercount', sessions.length);
-	});
-});
+var skippers = [];
 
 var currentSong = undefined;
 var songFinish = undefined;
 
 var allSongs = [];
 
+var songTimer = undefined;
+
 var PlayNextSong = function() {
+
+	if(songTimer != undefined)
+		clearTimeout(songTimer);
 
 	if(allSongs.length == 0) {
 
 		currentSong = undefined;
 		songFinish = undefined;
+		skippers = [];
 		console.log("no more songs left");
+
 		return;
 	}
 
@@ -119,7 +100,7 @@ var PlayNextSong = function() {
 
 	console.log("playing song " + currentSong);
 
-	setTimeout(function() {
+	songTimer = setTimeout(function() {
 
 		PlayNextSong();
 
@@ -155,4 +136,65 @@ db.child("queue").on("child_added", function(key, prev) {
 
 		PlayNextSong();
 	}
+});
+
+
+io.on('connection', function (socket) {
+
+	console.log("connected user");
+
+	sessions.push(socket);
+
+	io.sockets.emit('updateusercount', sessions.length);
+
+	console.log(sessions.length);
+
+	var sendSkipCount = function() {
+
+		io.sockets.emit('getskipcount', skippers.length);
+	};
+
+	var checkSkipPossible = function() {
+
+		if(skippers.length > sessions.length * 0.8) {
+
+			console.log("skipping song");
+
+			PlayNextSong();
+
+			sendSkipCount();
+		}
+	};
+
+	socket.on('disconnect', function(){
+
+		console.log("disconnected user");
+
+		// Remove from 
+		sessions.splice( sessions.indexOf(socket), 1);
+
+		io.sockets.emit('updateusercount', sessions.length);
+
+		console.log(sessions.length);
+	});
+
+	socket.on('getusercount', function() {
+
+		socket.emit('updateusercount', sessions.length);
+	});
+
+	socket.on('skipsong', function(user_id) {
+
+		if(skippers.indexOf(user_id) != -1) {
+
+			skippers.push(user_id);
+
+			console.log("skippers: " + skippers.length);
+
+			sendSkipCount();
+
+			checkSkipPossible();
+		}
+	});
+
 });
