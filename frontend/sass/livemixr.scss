@@ -5,7 +5,6 @@
 // Reset and dependencies
 @import "partials/normalize";
 @import "partials/print";
-@import "partials/glyphicons";
 
 // Core CSS
 @import "partials/scaffolding";
@@ -49,3 +48,6 @@
 // Utility classes
 @import "partials/utilities";
 @import "partials/responsive-utilities";
+
+// Bootswatch
+@import "partials/bootswatch";

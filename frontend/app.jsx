@@ -171,7 +171,7 @@ var Navbar = React.createClass({
             <div className="navbar navbar-default navbar-fixed-top">
                 <div className="container">
                     <div className="navbar-header">
-                        <a className="navbar-brand">
+                        <a href="#" className="navbar-brand">
                             <img src="img/LiveMixr-Logo.svg"/>
                         </a>
                     </div>
