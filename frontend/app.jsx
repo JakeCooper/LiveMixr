@@ -1,3 +1,5 @@
+var socket = io();
+
 var Oauth = React.createClass({
 	getInitialState: function () {
 		return {
@@ -509,7 +511,21 @@ var UserComponent = React.createClass({
 });
 
 var PlayBar = React.createClass({
+	getInitialState: function() {
+		return {
+			listeners: 0
+		}
+	},
+	componentDidMount: function () {
+		
+		var that = this;
 
+		socket.on('updateusercount', function(count) {
+			that.setState({listeners: count});			
+		});
+
+		socket.emit('getusercount');
+	},
 	render: function() {
 		return (
             <div className="playbar">
@@ -522,6 +538,7 @@ var PlayBar = React.createClass({
                         <div className="info">
                             <p className="song">Take me back</p>
                             <p className="artist-album">Nickelback - Here and Now</p>
+                            <div>{this.state.listeners} users listening</div>
                         </div>
                         <CounterComponent/>
                     </div>

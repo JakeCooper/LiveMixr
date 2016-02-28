@@ -60,29 +60,36 @@ console.log('Server listening on port ' + port);
 
 // Socket.IO part
 var io = require('socket.io')(server);
+var Firebase = require("firebase");
 
-var sendComments = function (socket) {
-	fs.readFile(path.resolve(__dirname + '/../_comments.json'), 'utf8', function(err, comments) {
-		comments = JSON.parse(comments);
-		socket.emit('comments', comments);
-	});
-};
+var db = new Firebase("https://saqaf086r05.firebaseio-demo.com");
+
+var sessions = [];
 
 io.on('connection', function (socket) {
-  console.log('New client connected!');
-  
-  socket.on('fetchComments', function () {
-		sendComments(socket);
+
+	console.log("connected user");
+
+	sessions.push(socket);
+
+	io.sockets.emit('updateusercount', sessions.length);
+
+	console.log(sessions.length);
+
+	socket.on('disconnect', function(){
+
+		console.log("disconnected user");
+
+		// Remove from 
+		sessions.splice( sessions.indexOf(socket), 1);
+
+		io.sockets.emit('updateusercount', sessions.length);
+
+		console.log(sessions.length);
 	});
 
-	socket.on('newComment', function (comment, callback) {
-		fs.readFile(path.resolve(__dirname + '/../_comments.json'), 'utf8', function(err, comments) {
-			comments = JSON.parse(comments);
-			comments.push(comment);
-			fs.writeFile('_comments.json', JSON.stringify(comments, null, 4), function (err) {
-				io.emit('comments', comments);
-				callback(err);
-			});
-		});
+	socket.on('getusercount', function() {
+
+		socket.emit('updateusercount', sessions.length);
 	});
 });
