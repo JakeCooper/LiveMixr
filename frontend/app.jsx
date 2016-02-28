@@ -38,7 +38,7 @@ var Oauth = React.createClass({
 		this.SigninData.immediate = false;
 
 		// lol good luck
-		gapi.auth.authorize( 
+		gapi.auth.authorize(
 			this.SigninData,
 			this.onAuthCallback
 		);
@@ -51,11 +51,11 @@ var Oauth = React.createClass({
 
 		if (AuthResult && !AuthResult.error) {
 
-            var that = this;
+			var that = this;
 
 			this.loadProfileInfo(function() {
-				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
-				 							id: that.state.ProfileId });
+				that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
+					id: that.state.ProfileId });
 			});
 
 		} else {
@@ -67,14 +67,14 @@ var Oauth = React.createClass({
 	},
 	loadProfileInfo: function(callback) {
 
-        var that = this;
+		var that = this;
 
-        gapi.client.load('plus', 'v1').then(function () {
-            var request = gapi.client.plus.people.get({
-                'userId': 'me'
-            });
+		gapi.client.load('plus', 'v1').then(function () {
+			var request = gapi.client.plus.people.get({
+				'userId': 'me'
+			});
 
-            request.then(function (resp) {
+			request.then(function (resp) {
 
 				that.state.ProfileName = resp.result.displayName;
 				that.state.ProfileImageUrl = resp.result.image.url;
@@ -92,52 +92,52 @@ var Oauth = React.createClass({
 					}
 				});
 
-                callback();
+				callback();
 
-            }, function (reason) {
-                console.log('Error: ' + reason.result.error.message);
-            });
-        });
-    },
-    render: function () {
-        return (
-            <div className="splash">
-                <div className="container">
-                    <div className="login-wrapper">
-                    	<If test={this.state.TriedAuth}>
-                    		<div>
-	                            <div className="login-header">
-	                                <h1>
-	                                    Welcome to Mixr
-	                                </h1>
-	                            </div>
-	                            <div className="login-description">
-	                                <div>{this.state.content}</div>
-	                                Mixr makes music social. Joins tens of other users voting, talking and listening to the
-	                                best music on the web.
-	                            </div>
-	                            <div className="login-auth">
-	                                <button className="btn-google" type="submit" onClick={this.onLogin}>
-	                                    <i className="fa fa-google-plus"></i>
-	                                    <div>
-	                                        <small>Sign in with</small>
-	                                        <br/>
-	                                        <big>Google</big>
-	                                    </div>
-	                                </button>
-	                            </div>
-                            </div>
-                        </If>
-                        <If test={!this.state.TriedAuth}>
-                            <div className="login-loading">
-                                <i className="fa fa-spinner fa-pulse"></i>
-                            </div>
-                        </If>
-                    </div>
-                </div>
-            </div>
-        )
-    }
+			}, function (reason) {
+				console.log('Error: ' + reason.result.error.message);
+			});
+		});
+	},
+	render: function () {
+		return (
+			<div className="splash">
+				<div className="container">
+					<div className="login-wrapper">
+						<If test={this.state.TriedAuth}>
+							<div>
+								<div className="login-header">
+									<h1>
+										Welcome to Mixr
+									</h1>
+								</div>
+								<div className="login-description">
+									<div>{this.state.content}</div>
+									Mixr makes music social. Joins tens of other users voting, talking and listening to the
+									best music on the web.
+								</div>
+								<div className="login-auth">
+									<button className="btn-google" type="submit" onClick={this.onLogin}>
+										<i className="fa fa-google-plus"></i>
+										<div>
+											<small>Sign in with</small>
+											<br/>
+											<big>Google</big>
+										</div>
+									</button>
+								</div>
+							</div>
+						</If>
+						<If test={!this.state.TriedAuth}>
+							<div className="login-loading">
+								<i className="fa fa-spinner fa-pulse"></i>
+							</div>
+						</If>
+					</div>
+				</div>
+			</div>
+		)
+	}
 });
 
 var CommentBox = React.createClass({
@@ -196,57 +196,57 @@ var CommentBox = React.createClass({
 });
 
 var CommentList = React.createClass({
-    render: function () {
-        var Comments = (<div>Loading comments...</div>);
-        if (this.props.comments) {
-            Comments = this.props.comments.map(function (comment) {
-                return (<Comment comment={comment}/>);
-            });
-        }
-        return (
-            <div className="commentList">
-                {Comments}
-            </div>
-        );
-    }
+	render: function () {
+		var Comments = (<div>Loading comments...</div>);
+		if (this.props.comments) {
+			Comments = this.props.comments.map(function (comment) {
+				return (<Comment comment={comment}/>);
+			});
+		}
+		return (
+			<div className="commentList">
+				{Comments}
+			</div>
+		);
+	}
 });
 var Comment = React.createClass({
-    render: function () {
-        return (
-            <div className="comment">
-            	<span className="author-pic"><img src={this.props.comment.image}/></span>
-                <span className="author">{this.props.comment.author}</span> said:<br/>
-                <div className="body">{this.props.comment.text}</div>
-            </div>
-        );
-    }
+	render: function () {
+		return (
+			<div className="comment">
+				<span className="author-pic"><img src={this.props.comment.image}/></span>
+				<span className="author">{this.props.comment.author}</span> said:<br/>
+				<div className="body">{this.props.comment.text}</div>
+			</div>
+		);
+	}
 });
 var CommentForm = React.createClass({
-    handleSubmit: function (e) {
-        e.preventDefault();
-        var that = this;
-        //var author = this.refs.author.getDOMNode().value;
-        var text = this.refs.text.getDOMNode().value;
-        //var comment = {author: author, text: text};
-        var submitButton = this.refs.submitButton.getDOMNode();
-        submitButton.innerHTML = 'Posting comment...';
-        submitButton.setAttribute('disabled', 'disabled');
-        this.props.submitComment(text, function (err) {
-            that.refs.text.getDOMNode().value = '';
-            submitButton.innerHTML = 'Post comment';
-            submitButton.removeAttribute('disabled');
-        });
-    },
-    render: function () {
-        return (
-            <div>
-                <form className="commentForm" onSubmit={this.handleSubmit}>
-                    <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-                    <button type="submit" ref="submitButton">Post comment</button>
-                </form>
-            </div>
-        );
-    }
+	handleSubmit: function (e) {
+		e.preventDefault();
+		var that = this;
+		//var author = this.refs.author.getDOMNode().value;
+		var text = this.refs.text.getDOMNode().value;
+		//var comment = {author: author, text: text};
+		var submitButton = this.refs.submitButton.getDOMNode();
+		submitButton.innerHTML = 'Posting comment...';
+		submitButton.setAttribute('disabled', 'disabled');
+		this.props.submitComment(text, function (err) {
+			that.refs.text.getDOMNode().value = '';
+			submitButton.innerHTML = 'Post comment';
+			submitButton.removeAttribute('disabled');
+		});
+	},
+	render: function () {
+		return (
+			<div>
+				<form className="commentForm" onSubmit={this.handleSubmit}>
+					<textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
+					<button type="submit" ref="submitButton">Post comment</button>
+				</form>
+			</div>
+		);
+	}
 });
 
 var Navbar = React.createClass({
@@ -254,30 +254,30 @@ var Navbar = React.createClass({
 		return {
 		};
 	},
-    render: function () {
-        return (
-            <div className="navbar navbar-default navbar-fixed-top">
-                <div className="container">
-                    <div className="navbar-header">
-                        <img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
-                    </div>
+	render: function () {
+		return (
+			<div className="navbar navbar-default navbar-fixed-top">
+				<div className="container">
+					<div className="navbar-header">
+						<img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
+					</div>
 					<div className="navbar-title">
-                        <h1>LiveMixr</h1>
-                    </div>
-                    <div className="navbar-user">
-                    {(this.props.authed == true
-				        ? 
-				          <div>
-				          	<img alt={this.props.user.name} src={this.props.user.image}/>
-				          	<span className="name">{this.props.user.name}</span> 
-				          </div>
-				        : false
-				    )}
-                    </div>
-                </div>
-            </div>
-        )
-    }
+						<h1>LiveMixr</h1>
+					</div>
+					<div className="navbar-user">
+						{(this.props.authed == true
+								?
+								<div>
+									<img alt={this.props.user.name} src={this.props.user.image}/>
+									<span className="name">{this.props.user.name}</span>
+								</div>
+								: false
+						)}
+					</div>
+				</div>
+			</div>
+		)
+	}
 });
 
 var If = React.createClass({
@@ -308,10 +308,10 @@ var MainPage = React.createClass({
 			<div>
 				<Navbar user={this.state.userParams} authed={this.state.isAuthd}/>
 				<If test={!this.state.isAuthd}>
-				<Oauth setAuthStatus={this.setAuthStatus}/>
+					<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
+					<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
 				</If>
 			</div>
 		)
@@ -372,6 +372,7 @@ var QueuePane = React.createClass({
 			that.setState({queue: queue})
 		})
 	},
+
 	render: function() {
 		return (
 			<div className="pane queue-pane">
@@ -427,6 +428,7 @@ var QueueWrapper = React.createClass({
 	}
 });
 
+
 var QueueItem = React.createClass({
 	render: function() {
 		return (
@@ -444,40 +446,109 @@ var UserComponent = React.createClass({
 });
 
 var PlayBar = React.createClass({
-
-	render: function() {
-		return (
-            <div className="playbar">
-                <div className="song-progress">
-                    <div className="song-progress-complete"></div>
-                </div>
-                <div class="content">
-                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
-                    <div className="wrapper">
-                        <div className="info">
-                            <p className="song">Take me back</p>
-                            <p className="artist-album">Nickelback - Here and Now</p>
-                        </div>
-                        <CounterComponent/>
-                    </div>
-                </div>
-            </div>
-		)
-	}
-});
-
-var CounterComponent = React.createClass({
-	updateSkip: function(){
-		//If the user has not tried to skip this song yet, increment his counter.
-		console.log("TEST")
+	getInitialState: function() {
+		this.returnCurrentSong();
+		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
 	},
+
+
+	setSong: function() {
+		SC.initialize({
+			client_id: '562a196f46a9c2241f185373ee32d44a',
+			redirect_uri: 'http://livemixr.azurewebsites.net/'
+		});
+
+		var player = SC.stream('/tracks/' + currSong.id).then(function (player) {
+			player.seek(currSong.time);
+			player.play();
+			console.log(player);
+		});
+	},
+
+	muteSong: function() {
+		player.setVolume(0);
+	},
+
+	unMuteSong: function() {
+		player.setVolume(1);
+	},
+
+	voteUp: function() {
+		console.log("fix this");
+	},
+
+	voteDown: function() {
+		console.log("fix this too");
+	},
+
+	returnCurrentSong: function() {
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var that = this;
+		queue.on("value", function(payload) {
+			var queue = [];
+			payload.forEach(function(data){
+				queue.push(data);
+			});
+			queue.sort(function(a,b){
+				return a.date > b.date
+			});
+
+			var request = new XMLHttpRequest();
+			request.open('GET', 'https://api.soundcloud.com/tracks/' + queue[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+			request.onload = function() {
+				if (request.status >= 200 && request.status < 400) {
+					var data = JSON.parse(request.responseText);
+					that.setState({title:data.title,artist:data.user.username,cover:data.artwork_url})
+				} else {
+					//handle failure from server
+				}
+			};
+
+			request.onerror = function() {
+				//connection problem
+			};
+
+			request.send();
+		})
+	},
+
+
 	render: function() {
 		return (
-			<div>
-				<div className="skip-counter">Counter</div>
-				<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
+			<div className="playbar">
+				<div className="song-progress">
+					<div className="song-progress-complete"></div>
+				</div>
+				<div class="content">
+					<img className="album-art" src={this.state.cover}/>
+					<div className="wrapper">
+						<div className="info">
+							<p className="song">{this.state.title}</p>
+							<p className="artist-album">{this.state.artist}</p>
+						</div>
+						<CounterComponent/>
+					</div>
+				</div>
+				<div className="mute">
+					setVolume(volume)
+				</div>
 			</div>
 			)
+		}
+	});
+
+	var CounterComponent = React.createClass({
+	updateSkip: function(){
+	//If the user has not tried to skip this song yet, increment his counter.
+		console.log("TEST")
+	},
+		render: function() {
+		return (
+		<div>
+		<div className="skip-counter">Counter</div>
+		<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
+		</div>
+		)
 	}
 });
 
