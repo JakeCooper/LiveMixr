@@ -1,4 +1,4 @@
-var OauthPage = React.createClass({
+var MainPage = React.createClass({
 	getInitialState: function () {
 		return {
 			RedirectURL: "http://livemixr.azurewebsites.net/",
@@ -135,6 +135,6 @@ var CommentForm = React.createClass({
 });
 
 React.render(
-	<OauthPage/>,
+	<MainPage/>,
 	document.getElementById('content')
 );
