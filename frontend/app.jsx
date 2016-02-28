@@ -54,15 +54,8 @@ var Oauth = React.createClass({
             var that = this;
 
 			this.loadProfileInfo(function() {
-
-
 				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
 				 							id: that.state.ProfileId });
-
-				//React.render(
-				//	<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
-				//	document.getElementById('content')
-				//);
 			});
 
 		} else {
@@ -185,8 +178,7 @@ var CommentBox = React.createClass({
 	render: function() {
 		return (
 			<div className="commentBox">
-				<h2>Hello {this.props.profileName}</h2>
-				<img src={this.props.profileUrl}/>
+				<h2>Hello {this.props.user.name}</h2>
 				<h3>Comments:</h3>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
@@ -253,13 +245,8 @@ var CommentForm = React.createClass({
 var Navbar = React.createClass({
 	getInitialState: function () {
 		return {
-
 		};
 	},
-	componentDidMount: function () {
-
-	},
-
     render: function () {
         return (
             <div className="navbar navbar-default navbar-fixed-top">
@@ -269,9 +256,11 @@ var Navbar = React.createClass({
                             <img src="img/LiveMixr-Logo.svg"/>
                         </a>
                     </div>
-
                     <div className="nav navbar-nav navbar-right">
-                        <img src={this.props.image}/>{this.props.name}
+                    {(this.props.authed == true
+				        ? <div><img src={this.props.user.image}/>{this.props.user.name}</div>     
+				        : false
+				    )}
                     </div>
                 </div>
             </div>
@@ -283,8 +272,7 @@ var If = React.createClass({
 	render: function() {
 		if (this.props.test) {
 			return this.props.children;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -292,22 +280,26 @@ var If = React.createClass({
 
 var MainPage = React.createClass({
 	getInitialState: function() {
-		return {isAuthd: false, userParams: {}}
+		return {isAuthd: false, userParams: null}
 	},
-
 	setAuthStatus: function(inParams) {
-		this.setState({isAuthd: true, userParams: inParams});
+		console.log("IN PARAMS")
+		console.log(inParams)
+		this.setState({userParams: inParams, isAuthd: true});
+	},
+	getAuthStatus: function() {
+		return this.state.isAuthd === true;
 	},
 	render: function() {
 
 		return (
 			<div>
-				<Navbar image={this.state.userParams.image} name={this.state.userParams.name}/>
+				<Navbar user={this.state.userParams} authed={this.state.isAuthd}/>
 				<If test={!this.state.isAuthd}>
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore/>
+				<Explore user={this.state.userParams}/>
 				</If>
 			</div>
 		)
@@ -318,7 +310,7 @@ var Explore = React.createClass({
 	render: function() {
 		return (
 			<div className="explore-pane">
-				<ChatPane/>
+				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
 				<QueuePane/>
 				<PlayerComponent/>
@@ -330,7 +322,7 @@ var Explore = React.createClass({
 var ChatPane = React.createClass({
 	render: function() {
 		return (
-			<div>ChatPane</div>
+			<CommentBox user={this.props.user}/>
 		)
 	}
 });
