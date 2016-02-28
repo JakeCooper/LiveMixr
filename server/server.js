@@ -64,6 +64,8 @@ var Firebase = require("firebase");
 
 var db = new Firebase("https://saqaf086r05.firebaseio-demo.com");
 
+var skipRatio = 0.8; // 80% of skips required
+
 var sessions = [];
 
 var skippers = [];
@@ -119,7 +121,8 @@ var RemoveSongByKey = function(key) {
 
 db.child("queue").on("child_added", function(key, prev) {
 
-	//console.log(key.val());
+
+	// Add to queue
 
 	var songKey = key.key();
 	song = key.val();
@@ -127,10 +130,12 @@ db.child("queue").on("child_added", function(key, prev) {
 
 	allSongs.push(song);
 
+	// sort by timestamps
 	allSongs.sort(function(a, b) {
 		return a.date > b.date;
 	});
 
+	// if no song playing, play one
 	if(currentSong == undefined) {
 
 		// logic to play first song
@@ -157,7 +162,7 @@ io.on('connection', function (socket) {
 
 	var checkSkipPossible = function() {
 
-		if(skippers.length > sessions.length * 0.8) {
+		if(skippers.length > sessions.length * skipRatio) {
 
 			console.log("skipping song");
 
@@ -191,6 +196,7 @@ io.on('connection', function (socket) {
 
 		console.log("skippers " + user_id);
 
+		// Make sure no duplicate skippers
 		if(skippers.indexOf(user_id) == -1) {
 
 			skippers.push(user_id);
