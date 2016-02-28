@@ -154,7 +154,7 @@ var CommentBox = React.createClass({
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.limitToLast(20).on("child_added", function(snapshot, prevKey) {
+		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -162,10 +162,11 @@ var CommentBox = React.createClass({
 			this.userdb.child(newComment.author).once("value", function(user) {
 
 				// Add to array of comments 
-				if(that.state.comments.length > 4)
-					that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url });
-				else
-					that.state.comments.unshift({author: user.val().name, text: newComment.text, image: user.val().profile_url });
+				that.state.comments.push({author: user.val().name, text: newComment.text, image: user.val().profile_url, timestamp: newComment.timestamp });
+
+				that.state.comments.sort(function(a,b) {
+					return a.timestamp > b.timestamp;
+				});
 
 				// Set new comment state
 				that.setState({comments: that.state.comments});
@@ -178,7 +179,8 @@ var CommentBox = React.createClass({
 		// Sends new comment to the comment db
 		this.commentdb.push({
 			author: this.props.user.id,
-			text: comment
+			text: comment,
+			timestamp: (new Date).getTime()
 		});
 
 		callback();
@@ -257,7 +259,7 @@ var CommentForm = React.createClass({
                                ref="text"
                                className="form-control"
                                placeholder="Send a Message"
-                               maxlength="200"/>
+                               maxLength="200"/>
                     </div>
                     <div className="message-button">
                         <button ref="submit" type="submit" className="btn btn-primary">
@@ -316,8 +318,6 @@ var MainPage = React.createClass({
 		return {isAuthd: false, userParams: null}
 	},
 	setAuthStatus: function(inParams) {
-		console.log("IN PARAMS")
-		console.log(inParams)
 		this.setState({userParams: inParams, isAuthd: true});
 	},
 	getAuthStatus: function() {
