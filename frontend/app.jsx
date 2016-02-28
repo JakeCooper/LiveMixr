@@ -154,7 +154,7 @@ var CommentBox = React.createClass({
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+		this.commentdb.limitToLast(20).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -185,9 +185,7 @@ var CommentBox = React.createClass({
 	},
 	render: function() {
 		return (
-			<div className="commentBox">
-				<h2>Hello {this.props.user.name}</h2>
-				<h3>Comments:</h3>
+			<div>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
 			</div>
@@ -196,6 +194,16 @@ var CommentBox = React.createClass({
 });
 
 var CommentList = React.createClass({
+    componentWillUpdate: function() {
+        var node = this.getDOMNode();
+        this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+    },
+    componentDidUpdate: function() {
+        if (this.shouldScrollBottom) {
+            var node = this.getDOMNode();
+            node.scrollTop = node.scrollHeight
+        }
+    },
     render: function () {
         var Comments = (<div>Loading comments...</div>);
         if (this.props.comments) {
@@ -204,7 +212,7 @@ var CommentList = React.createClass({
             });
         }
         return (
-            <div className="commentList">
+            <div className="message-list">
                 {Comments}
             </div>
         );
@@ -213,10 +221,14 @@ var CommentList = React.createClass({
 var Comment = React.createClass({
     render: function () {
         return (
-            <div className="comment">
-            	<span className="author-pic"><img src={this.props.comment.image}/></span>
-                <span className="author">{this.props.comment.author}</span> said:<br/>
-                <div className="body">{this.props.comment.text}</div>
+            <div className="message">
+                <div className="profile">
+                    <img src={this.props.comment.image}/>
+                </div>
+                <div className="content">
+                    <span className="author">{this.props.comment.author}</span>
+                    <div className="body">{this.props.comment.text}</div>
+                </div>
             </div>
         );
     }
@@ -227,22 +239,31 @@ var CommentForm = React.createClass({
         var that = this;
         //var author = this.refs.author.getDOMNode().value;
         var text = this.refs.text.getDOMNode().value;
+        if (text == "") return;
         //var comment = {author: author, text: text};
-        var submitButton = this.refs.submitButton.getDOMNode();
-        submitButton.innerHTML = 'Posting comment...';
+        var submitButton = this.refs.submit.getDOMNode();
         submitButton.setAttribute('disabled', 'disabled');
         this.props.submitComment(text, function (err) {
             that.refs.text.getDOMNode().value = '';
-            submitButton.innerHTML = 'Post comment';
             submitButton.removeAttribute('disabled');
         });
     },
     render: function () {
         return (
-            <div>
-                <form className="commentForm" onSubmit={this.handleSubmit}>
-                    <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-                    <button type="submit" ref="submitButton">Post comment</button>
+            <div className="message-form">
+                <form onSubmit={this.handleSubmit}>
+                    <div className="message-box">
+                        <input type="text"
+                               ref="text"
+                               className="form-control"
+                               placeholder="Send a Message"
+                               maxlength="200"/>
+                    </div>
+                    <div className="message-button">
+                        <button ref="submit" type="submit" className="btn btn-primary">
+                            <i className='fa fa-paper-plane'></i>
+                        </button>
+                    </div>
                 </form>
             </div>
         );
@@ -451,7 +472,7 @@ var PlayBar = React.createClass({
                 <div className="song-progress">
                     <div className="song-progress-complete"></div>
                 </div>
-                <div class="content">
+                <div className="content">
                     <img className="album-art" src="/img/Album-Placeholder.svg"/>
                     <div className="wrapper">
                         <div className="info">

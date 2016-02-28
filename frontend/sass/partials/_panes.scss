@@ -8,10 +8,15 @@
 .pane {
   padding: $padding-large-vertical $padding-large-horizontal;
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &.chat-pane {
     @extend .col-md-3;
-    border-left: solid $border-radius-base $gray-lighter;
+    padding: 0;
+    overflow-y: visible;
+    background: lighten($brand-primary, 10%);
+    border-right: solid $border-radius-base $brand-primary;
   }
   &.queue-pane {
     @extend .col-md-3;
