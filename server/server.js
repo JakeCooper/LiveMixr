@@ -7,7 +7,7 @@ var app = express();
 app.use('/', express.static(path.join(__dirname, '../frontend')));
 
 app.get('/testing', function(req,res) {
-
+	res.send("BONK")
 });
 
 var port = normalizePort(process.env.PORT || '4000');
