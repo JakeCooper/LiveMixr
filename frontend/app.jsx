@@ -311,7 +311,7 @@ var MainPage = React.createClass({
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<Explore user={this.state.userParams}/>
+				<Explore user={this.state.userParams} isAuthd={this.state.isAuthd}/>
 				</If>
 			</div>
 		)
@@ -324,7 +324,7 @@ var Explore = React.createClass({
 			<div className="container container-explore">
 				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
-				<QueuePane/>
+				<QueuePane isAuthd={this.props.isAuthd}/>
 				<PlayBar/>
 			</div>
 		)
@@ -350,9 +350,46 @@ var BrowsePane = React.createClass({
 });
 
 var QueuePane = React.createClass({
+	getInitialState: function() {
+		return {queue: []}
+	},
+	queueAppend: function(songUrl) {
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		queue.push({link: songUrl})
+	},
+
+	returnOrderedQueue: function(callback) {
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		var that = this;
+		queue.on("value", function(payload) {
+			queue = [];
+			payload.forEach(function(data){
+				queue.push(data.val())
+			});
+			that.setState({queue: queue})
+		})
+	},
 	render: function() {
 		return (
-			<div className="pane queue-pane">QueuePane</div>
+			<div className="pane queue-pane">
+				{(this.state.queue.length == 0)
+					? this.returnOrderedQueue()
+					: false
+				}
+				{this.state.queue.map(function(item) {
+					return <QueueItem item={item}/>
+				})}
+			</div>
+		)
+	}
+});
+
+
+
+var QueueItem = React.createClass({
+	render: function() {
+		return (
+			<div className="queue-item">{this.props.item}</div>
 		)
 	}
 });
