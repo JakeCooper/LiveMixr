@@ -1,3 +1,5 @@
+var socket = io();
+
 var Oauth = React.createClass({
 	getInitialState: function () {
 		return {
@@ -32,6 +34,10 @@ var Oauth = React.createClass({
 			this.onAuthCallback
 		);
 
+	},
+	getUserId: function() {
+
+		return this.state.ProfileId;
 	},
 	onLogin: function() {
 
@@ -370,7 +376,7 @@ var Explore = React.createClass({
 				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
 				<QueuePane isAuthd={this.props.isAuthd}/>
-				<PlayBar/>
+				<PlayBar user={this.props.user}/>
 			</div>
 		)
 	}
@@ -615,11 +621,32 @@ var UserComponent = React.createClass({
 });
 
 var PlayBar = React.createClass({
-
 	getInitialState: function() {
+		return {
+			listeners: 0
+		}
+	},
+	componentDidMount: function () {
+
+		var that = this;
+
+		socket.on('updateusercount', function(count) {
+			that.setState({listeners: count});
+		});
+
+		socket.emit('getusercount');
+
+		socket.on('playnextsong', function() {
+			that.setSong();
+		});
+
+		this.returnCurrentSong();
+
         this.setSong();
+
 		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
 	},
+
 
 	setSong: function() {
         this.returnCurrentSong(function(data){
@@ -699,8 +726,9 @@ var PlayBar = React.createClass({
                         <div className="info">
                             <p className="song">{this.state.title}</p>
                             <p className="artist-album">{this.state.artist}</p>
+                            <div>{this.state.listeners} users listening</div>
+                            <CounterComponent user={this.props.user}/>
                         </div>
-                        <CounterComponent/>
                     </div>
                 </div>
             </div>
@@ -709,17 +737,32 @@ var PlayBar = React.createClass({
 });
 
 var CounterComponent = React.createClass({
+	getInitialState: function() {
+		return {
+			skippers: 0
+		}
+	},
+	componentDidMount: function () {
+
+		var that = this;
+
+		socket.on('updateskipcount', function(count) {
+			that.setState({skippers: count});
+		});
+	},
 	updateSkip: function(){
 	//If the user has not tried to skip this song yet, increment his counter.
 		console.log("TEST")
+
+		socket.emit('skipsong', this.props.user.id);
 	},
 		render: function() {
 		return (
-			<div>
-				<div className="skip-counter">Counter</div>
+			<span>
+				<span className="skip-counter">{this.state.skippers}</span>
 				<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
-			</div>
-			)
+			</span>
+		)
 	}
 });
 
