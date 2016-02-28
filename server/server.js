@@ -76,7 +76,7 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('newComment', function (comment, callback) {
-		fs.readFile('_comments.json', 'utf8', function(err, comments) {
+		fs.readFile(path.resolve(__dirname + '/../_comments.json'), 'utf8', function(err, comments) {
 			comments = JSON.parse(comments);
 			comments.push(comment);
 			fs.writeFile('_comments.json', JSON.stringify(comments, null, 4), function (err) {
