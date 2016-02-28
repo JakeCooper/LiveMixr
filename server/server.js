@@ -94,12 +94,65 @@ io.on('connection', function (socket) {
 	});
 });
 
+var currentSong = undefined;
+var songFinish = undefined;
+
+var allSongs = [];
+
+var PlayNextSong = function() {
+
+	if(allSongs.length == 0) {
+
+		currentSong = undefined;
+		songFinish = undefined;
+		console.log("no more songs left");
+		return;
+	}
+
+	// remove from queue and grab next one
+	song = allSongs.shift();
+
+	currentSong = song.APIref;
+	songFinish = Date.now() + 1000 * 60;
+
+	RemoveSongByKey(song.key);
+
+	console.log("playing song " + currentSong);
+
+	setTimeout(function() {
+
+		PlayNextSong();
+
+	}, 1000 * 60);
+};
+
+var RemoveSongByKey = function(key) {
+
+	db.child("queue/" + key).remove();
+
+	console.log("removed song " + key);
+};
+
 // queue bullshit
 
-currentSong = undefined;
-songFinish = undefined;
+db.child("queue").on("child_added", function(key, prev) {
 
-db.child("queue").limitToFirst(1).on("child_added", function(key, prev) {
+	//console.log(key.val());
 
-	console.log(key);
+	var songKey = key.key();
+	song = key.val();
+	song.key = songKey;
+
+	allSongs.push(song);
+
+	allSongs.sort(function(a, b) {
+		return a.date > b.date;
+	});
+
+	if(currentSong == undefined) {
+
+		// logic to play first song
+
+		PlayNextSong();
+	}
 });
