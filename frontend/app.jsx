@@ -759,6 +759,10 @@ var PlayBar = React.createClass({
 				return a.date > b.date
 			});
 
+			// No song available in queue
+			if(queue[0] == undefined)
+				return;
+
 			var request = new XMLHttpRequest();
 			request.open('GET', 'https://api.soundcloud.com/tracks/' + queue[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
 			request.onload = function() {
