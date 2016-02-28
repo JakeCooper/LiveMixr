@@ -13,7 +13,6 @@
   min-height: $navbar-height; // Ensure a navbar always shows (e.g., without a .navbar-brand in collapsed mode)
   margin-bottom: $navbar-margin-bottom;
   border: 1px solid transparent;
-
   // Prevent floats from breaking the navbar
   @include clearfix;
 
@@ -32,6 +31,9 @@
   @include clearfix;
   @extend .col-sm-3;
   @extend .col-xs-6;
+  margin-right: 0px;
+  margin-left: 125px !important;
+  width: 240px;
   padding: $navbar-padding-vertical/2 $navbar-padding-horizontal;
   height: $navbar-height;
   img {
@@ -178,7 +180,7 @@
 .navbar-user {
   @extend .col-sm-3;
   @extend .col-xs-6;
-
+  width: 375px;
   text-align: right;
   padding: $navbar-padding-vertical/2 $navbar-padding-horizontal;
   height: $navbar-height;
@@ -426,7 +428,11 @@
   background-color: $navbar-default-bg;
   border-color: $navbar-default-border;
 
+  .container {
+    width: 100%;
+  }
   .navbar-brand {
+    margin-left: 0px;
     color: $navbar-default-brand-color;
     &:hover,
     &:focus {
