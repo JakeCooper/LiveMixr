@@ -35,7 +35,7 @@ var MainPage = React.createClass({
 			this.loadProfileInfo(function() {
 
 				React.render(
-					<CommentBox profileName={that.state.ProfileName}/>,
+					<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
 					document.getElementById('content')
 				);
 			});
@@ -101,6 +101,7 @@ var CommentBox = React.createClass({
 		return (
 			<div className="commentBox">
 				<h2>Hello {this.props.profileName}</h2>
+				<img src={this.props.profileUrl}/>
 				<h3>Comments:</h3>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
