@@ -491,11 +491,17 @@ var BrowseItem = React.createClass({
     getInitialState: function() {
         return {added: false}
     },
-    message: function(id) {
+    message: function(track) {
 
         // Adds the track ID to queue
         var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-        queue.push({APIref: id, date: Date.now()});
+        queue.push(
+            {
+                APIref: track.id,
+                date: Date.now(),
+                track
+            }
+        );
         this.setState({ added: true });
     },
     render: function() {
@@ -532,7 +538,7 @@ var BrowseItem = React.createClass({
                             </div>
                             <div className="controls">
                                 <button className={button.class} disabled={added}
-                                        onClick={!added ? this.message.bind(this, track.id) : null}>
+                                        onClick={!added ? this.message.bind(this, track) : null}>
                                     <i className={button.icon}/> {button.text}
                                 </button>
                             </div>
@@ -548,29 +554,6 @@ var BrowseItem = React.createClass({
 var QueuePane = React.createClass({
 	getInitialState: function() {
 		return {queue: []}
-	},
-	queueAppend: function(songUrl) {
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		queue.push({APIref: songUrl, date: Date.now()})
-	},
-
-	queueDeque: function() {
-		//call dequeue the most recent song. Call after done playing
-		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		fireQueue.on("value", function(payload) {
-			var queue = [];
-			Object.keys(payload.val()).map(function(data){
-				queue.push(payload.val()[data])
-			});
-			Object.keys(payload.val()).map(function(data,index){
-				queue[index]["key"] = data
-			});
-			queue.sort(function(a,b) {
-				return a.date > b.date;
-			});
-			fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/' + queue[0]["key"]);
-			fireQueue.remove();
-		})
 	},
 
 	returnOrderedQueue: function(callback) {
@@ -715,7 +698,6 @@ var PlayBar = React.createClass({
 
 
         this.returnCurrentSong(function(data){
-            console.log(data);
             SC.initialize({
                 client_id: '562a196f46a9c2241f185373ee32d44a',
                 redirect_uri: 'http://livemixr.azurewebsites.net/'
