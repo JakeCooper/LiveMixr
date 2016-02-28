@@ -9,7 +9,7 @@ var Oauth = React.createClass({
 		};
 	},
 	onLogin: function() {
-	console.log(this.state.ClientID);
+
 	gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
 
 		var SigninData = { 
@@ -21,12 +21,27 @@ var Oauth = React.createClass({
 
 		// lol good luck
 		gapi.auth.authorize( 
-			SigninData
+			SigninData,
+			this.onAuthCallback
 		);
+	},
+	onAuthCallback: function(AuthResult) {
+		if (AuthResult && !AuthResult.error) {
+
+			React.render(
+				<CommentBox/>,
+				document.getElementById('content')
+			);
+		} else {
+			this.setState({content:"Auth Failed!"});
+		}
 	},
 	render: function() {
 		return (
+				<div>
 				<button type="submit" onClick={this.onLogin}>Login</button>
+				<div>{this.state.content}</div>
+				</div>
 			)
 	}
 });
@@ -113,13 +128,12 @@ var CommentForm = React.createClass({
 					<textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
 					<button type="submit" ref="submitButton">Post comment</button>
 				</form>
-				<Oauth/>
 			</div>
 		);
 	}
 });
 
 React.render(
-	<CommentBox/>,
+	<Oauth/>,
 	document.getElementById('content')
 );
