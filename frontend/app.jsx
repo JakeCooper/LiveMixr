@@ -1,4 +1,4 @@
-var Oauth = React.createClass({
+var OauthPage = React.createClass({
 	getInitialState: function () {
 		return {
 			RedirectURL: "http://livemixr.azurewebsites.net/",
@@ -8,9 +8,9 @@ var Oauth = React.createClass({
 			Scope: "https://www.googleapis.com/auth/plus.profile.emails.read"
 		};
 	},
-	onLogin: function() {
 
-	gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
+	onLogin: function() {
+		gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
 
 		var SigninData = { 
 			'client_id': this.state.ClientID,
@@ -39,8 +39,9 @@ var Oauth = React.createClass({
 	render: function() {
 		return (
 				<div>
-				<button type="submit" onClick={this.onLogin}>Login</button>
-				<div>{this.state.content}</div>
+					<div className="login-header">LiveMixr</div>
+					<button className="auth-button" type="submit" onClick={this.onLogin}>Login</button>
+					<div>{this.state.content}</div>
 				</div>
 			)
 	}
@@ -134,6 +135,6 @@ var CommentForm = React.createClass({
 });
 
 React.render(
-	<Oauth/>,
+	<OauthPage/>,
 	document.getElementById('content')
 );
