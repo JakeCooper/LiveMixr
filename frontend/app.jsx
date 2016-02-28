@@ -390,7 +390,9 @@ var ChatPane = React.createClass({
 var BrowsePane = React.createClass({
 	render: function() {
 		return (
-			<div className="pane browse-pane">BrowsePane</div>
+			<div className="pane browse-pane">
+				<SearchBox/>
+			</div>
 		)
 	}
 });
@@ -493,7 +495,6 @@ var QueueWrapper = React.createClass({
 	}
 });
 
-
 var QueueItem = React.createClass({
 	render: function() {
 		return (
@@ -501,6 +502,89 @@ var QueueItem = React.createClass({
 		)
 	}
 });
+
+
+
+var SearchItem = React.createClass({
+	message: function(id) {
+
+		// Adds the track ID to queue
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		queue.push({APIref: id, date: Date.now()});
+
+		this.props.owner.reset();
+	},
+	render: function() {
+		return (
+
+			<span>
+			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
+			</span>
+		)
+	}
+});
+
+var SearchBox = React.createClass({
+	getInitialState: function() {
+		return {items: []}
+	},
+	handleChange: function(sel) {
+		//console.log(sel);
+		var that = this;
+		this.reset();
+		clearTimeout(this.timeout);
+		this.timeout = setTimeout(function() {
+
+			SC.initialize({
+				client_id: '562a196f46a9c2241f185373ee32d44a'
+			});
+
+			// find all sounds of buskers licensed under 'creative commons share alike'
+			SC.get('/tracks', {
+				q: that.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
+			}).then(function(tracks) {
+				that.setState({items: tracks});
+			});
+		},500);
+
+	},
+	reset: function() {
+		this.setState({items: []});
+	},
+	appendToQueue: function() {
+		console.log("test");
+	},
+	render: function() {
+		return (
+			<form className="navbar-form navbar-left" role="search">
+				<div className="form-group">
+					<input type="text" ref="searchtext" onChange={this.handleChange} className="form-control" placeholder="Search"/>
+				</div>
+				<button type="submit" className="btn btn-default">Submit</button>
+				<div>
+					
+					{this.state.items.map(function(track, i) {
+						return (
+							<div>
+								<SearchItem track={track} owner={this}/>
+							</div>
+						);	
+					}.bind(this))}
+				</div>
+			</form>
+		)
+	}
+})
+//
+//var SearchResults = React.createClass({
+//	handleSearch: function() {
+//		console.out("TEST");
+//	},
+//
+//	render: function() {
+//		<div className="search-results">handleSearch</div>
+//	}
+//})
 
 var UserComponent = React.createClass({
 	render: function() {
@@ -585,11 +669,11 @@ var PlayBar = React.createClass({
                     <div className="song-progress-complete"></div>
                 </div>
                 <div className="content">
-                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
+                    <img className="album-art" src={this.state.cover}/>
                     <div className="wrapper">
                         <div className="info">
-                            <p className="song">Take me back</p>
-                            <p className="artist-album">Nickelback - Here and Now</p>
+                            <p className="song">{this.state.title}</p>
+                            <p className="artist-album">{this.state.artist}</p>
                         </div>
                         <CounterComponent/>
                     </div>
@@ -599,7 +683,7 @@ var PlayBar = React.createClass({
 	}
 });
 
-	var CounterComponent = React.createClass({
+var CounterComponent = React.createClass({
 	updateSkip: function(){
 	//If the user has not tried to skip this song yet, increment his counter.
 		console.log("TEST")
