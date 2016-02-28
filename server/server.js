@@ -95,11 +95,11 @@ var PlayNextSong = function() {
 	}
 
 	// remove from queue and grab next one
-	song = allSongs.shift();
+	var song = allSongs.shift();
 
 	currentSong = song.APIref;
 	songStart = (new Date).getTime();
-	songFinish = songStart + (song.length != undefined ? song.length : 1000 * 60);
+	songFinish = songStart + (song.duration != undefined ? song.duration : 1000 * 60);
 
 	console.log("finish " + songFinish);
 
@@ -111,12 +111,12 @@ var PlayNextSong = function() {
 
 		sess.emit("playnextsong", 0);
 	});
-
+	;
 	songTimer = setTimeout(function() {
 
 		PlayNextSong();
 
-	}, song.length);
+	}, song.duration);
 };
 
 var RemoveSongByKey = function(key) {

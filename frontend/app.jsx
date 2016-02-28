@@ -499,6 +499,7 @@ var BrowseItem = React.createClass({
             {
                 APIref: track.id,
                 title: track.title,
+                duration: track.duration,
                 date: Date.now(),
                 song: track
             }
