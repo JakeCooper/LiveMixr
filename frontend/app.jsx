@@ -168,8 +168,18 @@ var CommentForm = React.createClass({
 var Navbar = React.createClass({
     render: function () {
         return (
-            <div className="navbar navbar-default">
-                I am a navbar
+            <div className="navbar navbar-default navbar-fixed-top">
+                <div className="container">
+                    <div className="navbar-header">
+                        <a className="navbar-brand">
+                            <img src="img/LiveMixr-Logo.svg"/>
+                        </a>
+                    </div>
+
+                    <div className="nav navbar-nav navbar-right">
+                        {/* TODO: User Info */}
+                    </div>
+                </div>
             </div>
         )
     }
