@@ -7,33 +7,56 @@ var Oauth = React.createClass({
 			RequestVisibleActions: "http://schema.org/AddAction",
 			Scope: "https://www.googleapis.com/auth/plus.profile.emails.read",
 			ProfileName: null,
-			ProfileImageUrl: null
+			ProfileImageUrl: null,
+			ProfileId: null,
+			TriedAuth: false,
+			content: null
 		};
 	},
-
-	onLogin: function() {
+	componentDidMount: function () {
 		gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
 
-		var SigninData = { 
+		// We try to auth as soon as page is loaded. If true, then we move past login page instantly
+		// If not, then we wait for user to hit login and do the full page-by-page auth request
+		this.SigninData = { 
 			'client_id': this.state.ClientID,
 			'cookiepolicy': this.state.CookiePolicy,
 			'requestvisibleactions': this.state.RequestVisibleActions,
-			'scope': this.state.Scope
+			'scope': this.state.Scope,
+			'immediate': true // Means we want to instantly know if user is authed or not
 		};
+
+		gapi.auth.authorize( 
+			this.SigninData,
+			this.onAuthCallback
+		);
+
+	},
+	onLogin: function() {
+		
+		this.SigninData.immediate = false;
 
 		// lol good luck
 		gapi.auth.authorize( 
-			SigninData,
+			this.SigninData,
 			this.onAuthCallback
 		);
 	},
 	onAuthCallback: function(AuthResult) {
+
+		// This will signal to show the login bar after first auth attempt
+		// If the first auth failed, then user will have to login
+		TriedAuth = true;
+
 		if (AuthResult && !AuthResult.error) {
 
 			var that = this;
 
 			this.loadProfileInfo(function() {
-				 that.props.setAuthStatus();
+				 
+				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
+				 							id: that.state.ProfileId });
+
 				//React.render(
 				//	<CommentBox profileName={that.state.ProfileName} profileUrl={that.state.ProfileImageUrl}/>,
 				//	document.getElementById('content')
@@ -41,7 +64,10 @@ var Oauth = React.createClass({
 			});
 			
 		} else {
-			this.setState({content:"Auth Failed!"});
+
+			// TODO: What to do if auth fails?
+
+			this.setState({content:"Failed to login to Google+"});
 		}
 	},
 	loadProfileInfo: function(callback) {
@@ -57,6 +83,19 @@ var Oauth = React.createClass({
 
 				that.state.ProfileName = resp.result.displayName;
 				that.state.ProfileImageUrl = resp.result.image.url;
+				that.state.ProfileId = resp.result.id;
+
+				// Save data to firebase
+				that.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users/' + that.state.ProfileId);
+
+				// Load the user value
+				that.userdb.once('value', function(user) {
+
+					// See if this user has been persisted to the db. If not, save their data
+					if(!user.hasChild("id")) {
+						that.userdb.set({name: that.state.ProfileName, id: that.state.ProfileId, profile_url: that.state.ProfileImageUrl});
+					}
+				});
 
 				callback();
 
@@ -68,9 +107,14 @@ var Oauth = React.createClass({
 	render: function() {
 		return (
 				<div>
+					<div>{this.state.content}</div>
+					<If test={this.state.TriedAuth}>
 					<div className="login-header">LiveMixr</div>
 					<button className="auth-button" type="submit" onClick={this.onLogin}>Login</button>
-					<div>{this.state.content}</div>
+					</If>
+					<If test={!this.state.TriedAuth}>
+					<div>Loading</div>
+					</If>
 				</div>
 			)
 	}
@@ -180,6 +224,11 @@ var CommentForm = React.createClass({
 });
 
 var Navbar = React.createClass({
+	getInitialState: function () {
+		return {
+			
+		};
+	},
 	render: function() {
 		return (
 			<div className="navbar navbar-default">
@@ -202,17 +251,17 @@ var If = React.createClass({
 
 var MainPage = React.createClass({
 	getInitialState: function() {
-		return {isAuthd: false}
+		return {isAuthd: false, userParams: null}
 	},
 
-	setAuthStatus: function() {
-		this.setState({isAuthd: true})
+	setAuthStatus: function(inParams) {
+		this.setState({isAuthd: true, userParams: inParams});
 	},
 	render: function() {
 
 		return (
 			<div>
-				<Navbar/>
+				<Navbar userParams={this.state.userParams}/>
 				<If test={!this.state.isAuthd}>
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
