@@ -203,9 +203,62 @@ var MainPage = React.createClass({
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
 				<If test={this.state.isAuthd}>
-				<div> WE LOGGED IN NOW BOYZ </div>
+				<Explore/>
 				</If>
 			</div>
+		)
+	}
+});
+
+var Explore = React.createClass({
+	render: function() {
+		return (
+			<div className="explore-pane">
+				<ChatPane/>
+				<BrowsePane/>
+				<QueuePane/>
+				<PlayerComponent/>
+			</div>
+		)
+	}
+});
+
+var ChatPane = React.createClass({
+	render: function() {
+		return (
+			<div>ChatPane</div>
+		)
+	}
+});
+
+var BrowsePane = React.createClass({
+	render: function() {
+		return (
+			<div>BrowsePane</div>
+		)
+	}
+});
+
+var QueuePane = React.createClass({
+	render: function() {
+		return (
+			<div>QueuePane</div>
+		)
+	}
+});
+
+var UserComponent = React.createClass({
+	render: function() {
+		return (
+			<div>UserComponent</div>
+		)
+	}
+});
+
+var PlayerComponent = React.createClass({
+	render: function() {
+		return (
+			<div>PlayerComponent</div>
 		)
 	}
 });
