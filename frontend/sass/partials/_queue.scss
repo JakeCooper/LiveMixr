@@ -1,0 +1,30 @@
+.queue-pane {
+  .queue-song {
+    @extend .panel;
+    @extend .panel-default;
+
+    .album-art {
+      float: left;
+      height: $queue-song-height;
+      width: $queue-song-height;
+      img {
+        height: 100%;
+        //border-radius: $border-radius-base;
+      }
+    }
+    .content {
+      margin-left: $queue-song-height;
+
+      padding: $padding-large-vertical $padding-large-horizontal;
+
+      .title {
+        font-weight: bold;
+
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
