@@ -916,14 +916,14 @@ pre code {
   clear: both;
 }
 
-.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .splash .login-wrapper .login-auth, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .splash .login-wrapper, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .splash .login-wrapper, .col-md-8, .col-lg-8, .splash .login-wrapper .login-description, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12, .splash .login-wrapper .login-header {
+.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .navbar-header, .navbar-user, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .splash .login-wrapper .login-auth, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .navbar-header, .navbar-user, .col-sm-6, .navbar-title, .col-md-6, .splash .login-wrapper, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .splash .login-wrapper, .col-md-8, .col-lg-8, .splash .login-wrapper .login-description, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12, .splash .login-wrapper .login-header {
   position: relative;
   min-height: 1px;
   padding-left: 15px;
   padding-right: 15px;
 }
 
-.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .navbar-header, .navbar-user, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
   float: left;
 }
 
@@ -947,7 +947,7 @@ pre code {
   width: 41.66667%;
 }
 
-.col-xs-6 {
+.col-xs-6, .navbar-header, .navbar-user {
   width: 50%;
 }
 
@@ -1132,7 +1132,7 @@ pre code {
 }
 
 @media (min-width: 768px) {
-  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .splash .login-wrapper, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+  .col-sm-1, .col-sm-2, .col-sm-3, .navbar-header, .navbar-user, .col-sm-4, .col-sm-5, .col-sm-6, .navbar-title, .col-sm-7, .col-sm-8, .splash .login-wrapper, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
     float: left;
   }
 
@@ -1144,7 +1144,7 @@ pre code {
     width: 16.66667%;
   }
 
-  .col-sm-3 {
+  .col-sm-3, .navbar-header, .navbar-user {
     width: 25%;
   }
 
@@ -1156,7 +1156,7 @@ pre code {
     width: 41.66667%;
   }
 
-  .col-sm-6 {
+  .col-sm-6, .navbar-title {
     width: 50%;
   }
 
@@ -3719,6 +3719,10 @@ tbody.collapse.in {
   }
 }
 
+.navbar-header {
+  padding: 12.5px 15px;
+  height: 70px;
+}
 .navbar-header:before, .navbar-header:after {
   content: " ";
   display: table;
@@ -3726,10 +3730,8 @@ tbody.collapse.in {
 .navbar-header:after {
   clear: both;
 }
-@media (min-width: 768px) {
-  .navbar-header {
-    float: left;
-  }
+.navbar-header img {
+  height: 100%;
 }
 
 .navbar-collapse {
@@ -3834,26 +3836,31 @@ tbody.collapse.in {
   border-width: 1px 0 0;
 }
 
-.navbar-brand {
-  float: left;
+.navbar-title {
+  text-align: center;
+}
+.navbar-title h1 {
+  color: #fff;
+}
+
+.navbar-user {
+  text-align: right;
   padding: 12.5px 15px;
-  font-size: 18px;
-  line-height: 20px;
   height: 70px;
 }
-.navbar-brand:hover, .navbar-brand:focus {
-  text-decoration: none;
-}
-.navbar-brand > img {
-  display: block;
+.navbar-user img {
+  border-radius: 50%;
   max-height: 100%;
 }
-.navbar-brand > img:hover, .navbar-brand > img:focus {
-  -webkit-filter: brightness(90%);
+.navbar-user .name {
+  font-size: 18px;
+  display: inline-block;
+  padding: 7px;
+  color: #fff;
 }
 @media (min-width: 768px) {
-  .navbar > .container .navbar-brand, .navbar > .container-fluid .navbar-brand {
-    margin-left: -15px;
+  .navbar > .container .navbar-user, .navbar > .container-fluid .navbar-user {
+    margin-right: -15px;
   }
 }
 
@@ -4654,6 +4661,34 @@ a.thumbnail.active {
 }
 .alert-danger .alert-link {
   color: #e6e6e6;
+}
+
+.player-component {
+  position: fixed;
+  bottom: 0px;
+  border: 1px solid black;
+  width: 100%;
+}
+.player-component .album-art {
+  width: 7%;
+  float: left;
+}
+.player-component .album-name {
+  margin-top: 1.6%;
+  margin-bottom: 1%;
+  margin-left: 10%;
+}
+.player-component .song-name {
+  margin-left: 10%;
+}
+.player-component .skip-button {
+  position: fixed;
+  margin-left: 45%;
+  margin-top: -3%;
+}
+.player-component .skip-counter {
+  margin-left: 80%;
+  margin-top: -2.5%;
 }
 
 @-webkit-keyframes progress-bar-stripes {
@@ -6314,7 +6349,7 @@ button.close {
 }
 
 @media (max-width: 767px) {
-  .hidden-xs {
+  .hidden-xs, .navbar-title {
     display: none !important;
   }
 }
