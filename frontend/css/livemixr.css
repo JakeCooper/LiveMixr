@@ -916,7 +916,7 @@ pre code {
   clear: both;
 }
 
-.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .splash .login-wrapper, .splash .login-wrapper .login-description, .splash .login-wrapper .login-auth, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .splash .login-wrapper, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12, .splash .login-wrapper .login-header {
+.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .splash .login-wrapper .login-auth, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .splash .login-wrapper, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .splash .login-wrapper, .col-md-8, .col-lg-8, .splash .login-wrapper .login-description, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12, .splash .login-wrapper .login-header {
   position: relative;
   min-height: 1px;
   padding-left: 15px;
@@ -1341,7 +1341,7 @@ pre code {
   }
 }
 @media (min-width: 992px) {
-  .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .splash .login-wrapper, .splash .login-wrapper .login-description, .splash .login-wrapper .login-auth, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+  .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .splash .login-wrapper, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
     float: left;
   }
 
@@ -1365,7 +1365,7 @@ pre code {
     width: 41.66667%;
   }
 
-  .col-md-6, .splash .login-wrapper, .splash .login-wrapper .login-description, .splash .login-wrapper .login-auth {
+  .col-md-6, .splash .login-wrapper {
     width: 50%;
   }
 
@@ -1550,7 +1550,7 @@ pre code {
   }
 }
 @media (min-width: 1200px) {
-  .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .splash .login-wrapper .login-header {
+  .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .splash .login-wrapper .login-auth, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .splash .login-wrapper .login-description, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .splash .login-wrapper .login-header {
     float: left;
   }
 
@@ -1566,7 +1566,7 @@ pre code {
     width: 25%;
   }
 
-  .col-lg-4 {
+  .col-lg-4, .splash .login-wrapper .login-auth {
     width: 33.33333%;
   }
 
@@ -1582,7 +1582,7 @@ pre code {
     width: 58.33333%;
   }
 
-  .col-lg-8 {
+  .col-lg-8, .splash .login-wrapper .login-description {
     width: 66.66667%;
   }
 
@@ -2966,6 +2966,38 @@ input[type="button"].btn-block {
 }
 .splash .login-wrapper .login-description {
   color: #FFF;
+}
+.splash .login-wrapper .login-auth .btn-google {
+  color: #fff;
+  background-color: #DF4A32;
+  border-color: #c0341e;
+  outline: none;
+}
+.splash .login-wrapper .login-auth .btn-google:hover, .splash .login-wrapper .login-auth .btn-google:focus, .splash .login-wrapper .login-auth .btn-google:active {
+  color: #fff;
+  background-color: #DF4A32;
+  border-color: #c0341e;
+  outline: none;
+}
+.splash .login-wrapper .login-auth .btn-google:active:hover, .splash .login-wrapper .login-auth .btn-google:active:focus {
+  color: #e6e6e6;
+  background-color: #c0341e;
+  border-color: #942817;
+  outline: none;
+}
+.splash .login-wrapper .login-auth .btn-google i {
+  float: left;
+  font-size: 36px;
+}
+.splash .login-wrapper .login-auth .btn-google div {
+  float: right;
+}
+.splash .login-wrapper .login-auth .btn-google div big {
+  font-size: 18px;
+}
+.splash .login-wrapper .login-auth .btn-google div small {
+  font-size: 11px;
+  line-height: 12px;
 }
 
 .fade {

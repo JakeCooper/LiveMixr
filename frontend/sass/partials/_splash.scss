@@ -28,15 +28,51 @@
       }
     }
     .login-description {
-      @extend .col-md-6;
+      @extend .col-lg-8;
       color: #FFF;
     }
     .login-auth {
-      @extend .col-md-6;
+      @extend .col-lg-4;
       & > button {
         @extend .btn;
         @extend .btn-default;
         @extend .btn-block;
+      }
+      .btn-google {
+        color: #fff;
+        background-color: #DF4A32;
+        border-color: darken(#DF4A32, 10%);
+        outline: none;
+
+        &:hover,
+        &:focus,
+        &:active {
+          color: #fff;
+          background-color: #DF4A32;
+          border-color: darken(#DF4A32, 10%);
+          outline: none;
+        }
+        &:active:hover,
+        &:active:focus {
+          color: darken(#fff, 10%);
+          background-color: darken(#DF4A32, 10%);
+          border-color: darken(#DF4A32, 20%);
+          outline: none;
+        }
+        i {
+          float:left;
+          font-size: 36px;
+        }
+        div {
+          float: right;
+          big {
+            font-size: 18px;
+          }
+          small {
+            font-size: 11px;
+            line-height: 12px;
+          }
+        }
       }
     }
 

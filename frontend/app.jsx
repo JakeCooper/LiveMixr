@@ -72,14 +72,20 @@ var Oauth = React.createClass({
                     <div className="login-wrapper">
                         <div className="login-header">
                             <h1>
-                                Welcome to LiveMixr
+                                Welcome to Mixr
                             </h1>
                         </div>
                         <div className="login-description">
-                            LiveMixr makes music social. Joins tens of other users voting, talking and listening to the best music on the web.
+                            Mixr makes music social. Joins tens of other users voting, talking and listening to the best music on the web.
                         </div>
                         <div className="login-auth">
-                            <button className="login-google" type="submit" onClick={this.onLogin}>Login</button>
+                            <button className="btn-google" type="submit" onClick={this.onLogin}>
+                                <i className="fa fa-google-plus"></i>
+                                <div>
+                                    <small>Sign in with</small><br/>
+                                    <big>Google</big>
+                                </div>
+                            </button>
                         </div>
                     </div>
                 </div>
