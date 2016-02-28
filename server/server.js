@@ -116,7 +116,7 @@ var PlayNextSong = function() {
 
 		PlayNextSong();
 
-	}, 1000 * 60);
+	}, song.length);
 };
 
 var RemoveSongByKey = function(key) {

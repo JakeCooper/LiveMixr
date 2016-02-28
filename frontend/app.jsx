@@ -318,7 +318,7 @@ var Navbar = React.createClass({
 						<img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
 					</div>
 					<div className="navbar-title">
-						<h1>LiveMixr</h1>
+						<h1>Mixr</h1>
 					</div>
 					<div className="navbar-user">
 						{(this.props.authed == true
@@ -326,7 +326,7 @@ var Navbar = React.createClass({
 								<div>
 									<img alt={this.props.user.name} src={this.props.user.image}/>
 									<span className="name">{this.props.user.name}</span>
-									<span className="name logout" onClick={this.logout}>Logout</span>
+									<span className="name logout"><a href="#" onClick={this.logout}>Logout</a></span>
 								</div>
 							: false
 						)}
@@ -441,7 +441,7 @@ var BrowsePane = React.createClass({
                 <div className="search-info search-loading">
                     <i className="fa fa-spinner fa-pulse"/>
                 </div>
-        } else if (this.state.items.length > 0){
+        } else if (this.state.items !== undefined && this.state.items.length > 0){
             tracks = this.state.items.map(function (track, i) {
                 return (<BrowseItem track={track} owner={this}/>);
             }.bind(this));
@@ -516,7 +516,7 @@ var BrowseItem = React.createClass({
         };
         return (
             <span>
-			{(track || false) ?
+			{((track && track.description !== undefined && track.description !== null && track.description.length) || false) ?
                 <div className="browse-song">
                     <div className="album-art">
                         <img src={track.artwork_url || "/img/Album-Placeholder.svg"}/>
@@ -640,8 +640,6 @@ var PlayBar = React.createClass({
 
 		socket.on('playnextsong', function(seek) {
 			that.setSong(seek);
-
-			console.log("seek " + seek);
 		});
 
 		this.returnCurrentSong();
@@ -664,10 +662,8 @@ var PlayBar = React.createClass({
             });
 
             var player = SC.stream('/tracks/' + data.id).then(function (player) {
-            	console.log("seeking " + seektime);
                 player.seek(seektime);
                 player.play();
-                console.log(player);
             });
         });
 	},
@@ -700,6 +696,10 @@ var PlayBar = React.createClass({
 			queue.sort(function(a,b){
 				return a.date > b.date
 			});
+
+			// No song available in queue
+			if(queue[0] == undefined)
+				return;
 
 			var request = new XMLHttpRequest();
 			request.open('GET', 'https://api.soundcloud.com/tracks/' + queue[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
@@ -758,7 +758,6 @@ var CounterComponent = React.createClass({
 	},
 	updateSkip: function(){
 	//If the user has not tried to skip this song yet, increment his counter.
-		console.log("TEST")
 
 		socket.emit('skipsong', this.props.user.id);
 	},
