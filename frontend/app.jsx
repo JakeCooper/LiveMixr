@@ -491,11 +491,19 @@ var BrowseItem = React.createClass({
     getInitialState: function() {
         return {added: false}
     },
-    message: function(id) {
+    message: function(track) {
 
         // Adds the track ID to queue
         var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-        queue.push({APIref: id, date: Date.now()});
+        queue.push(
+            {
+                APIref: track.id,
+                title: track.title,
+                duration: track.duration,
+                date: Date.now(),
+                song: track
+            }
+        );
         this.setState({ added: true });
     },
     render: function() {
@@ -532,7 +540,7 @@ var BrowseItem = React.createClass({
                             </div>
                             <div className="controls">
                                 <button className={button.class} disabled={added}
-                                        onClick={!added ? this.message.bind(this, track.id) : null}>
+                                        onClick={!added ? this.message.bind(this, track) : null}>
                                     <i className={button.icon}/> {button.text}
                                 </button>
                             </div>
@@ -547,39 +555,17 @@ var BrowseItem = React.createClass({
 
 var QueuePane = React.createClass({
 	getInitialState: function() {
-		return {queue: []}
-	},
-	queueAppend: function(songUrl) {
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		queue.push({APIref: songUrl, date: Date.now()})
+        this.listenQueueChanges();
+		return {queue: []};
 	},
 
-	queueDeque: function() {
-		//call dequeue the most recent song. Call after done playing
-		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		fireQueue.on("value", function(payload) {
-			var queue = [];
-			Object.keys(payload.val()).map(function(data){
-				queue.push(payload.val()[data])
-			});
-			Object.keys(payload.val()).map(function(data,index){
-				queue[index]["key"] = data
-			});
-			queue.sort(function(a,b) {
-				return a.date > b.date;
-			});
-			fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/' + queue[0]["key"]);
-			fireQueue.remove();
-		})
-	},
-
-	returnOrderedQueue: function(callback) {
+	listenQueueChanges: function(callback) {
 		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
 		var that = this;
 		fireQueue.on("value", function(payload) {
 			var queue = [];
 			payload.forEach(function(data){
-				queue.push(data.val())
+				queue.push(data.val());
 			});
 			queue.sort(function(a,b) {
 				return a.date > b.date;
@@ -591,53 +577,11 @@ var QueuePane = React.createClass({
 	render: function() {
 		return (
 			<div className="pane queue-pane">
-				{(this.state.queue.length == 0)
-					? this.returnOrderedQueue()
-					: false
-				}
 				{this.state.queue.map(function(item) {
-					return <QueueWrapper APIref={item.APIref}/>
+					return <QueueItem key={item.APIref}
+                                      song={item.song}
+                                      APIref={item.APIref}/>
 				})}
-			</div>
-		)
-	}
-});
-
-var QueueWrapper = React.createClass({
-	getInitialState: function() {
-		return {song: {}, requested: false}
-	},
-	ComponentShouldUpdate: function() {
-		return (Object.keys(this.state.song).length == 0 || !this.state.requested )
-	},
-
-	getSongInfo: function(songId, callback) {
-		var request = new XMLHttpRequest();
-		request.open('GET', 'https://api.soundcloud.com/tracks/' + songId + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
-		var that = this;
-		request.onload = function() {
-			if (request.status >= 200 && request.status < 400) {
-				var data = JSON.parse(request.responseText);
-				that.setState({song:data, requested:true})
-			} else {
-				//handle failure from server
-			}
-		};
-
-		request.onerror = function() {
-			//connection problem
-		};
-
-		request.send();
-	},
-
-	render: function() {
-		return (
-			<div className="queue-item">
-				{(Object.keys(this.state.song)).length > 0
-					? <QueueItem songInfo={this.state.song}/>
-					: this.getSongInfo(this.props.APIref)
-				}
 			</div>
 		)
 	}
@@ -648,18 +592,18 @@ var QueueItem = React.createClass({
 		return (
             <div className="queue-song panel panel-default">
                 <div className="album-art">
-                    <img src={this.props.songInfo.artwork_url || "/img/Album-Placeholder.svg"}/>
+                    <img src={this.props.song.artwork_url || "/img/Album-Placeholder.svg"}/>
                 </div>
                 <div className="content">
                     <div className="info">
                         <div className="title">
-                            <a href={this.props.songInfo.permalink_url} target="_blank">
-                                {this.props.songInfo.title}
+                            <a href={this.props.song.permalink_url} target="_blank">
+                                {this.props.song.title}
                             </a>
                         </div>
                         <div className="user">
-                            <a href={this.props.songInfo.user.permalink_url} target="_blank">
-                                {this.props.songInfo.user.username}
+                            <a href={this.props.song.user.permalink_url} target="_blank">
+                                {this.props.song.user.username}
                             </a>
                         </div>
                     </div>
