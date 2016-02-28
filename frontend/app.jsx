@@ -229,13 +229,12 @@ var CommentForm = React.createClass({
         var that = this;
         //var author = this.refs.author.getDOMNode().value;
         var text = this.refs.text.getDOMNode().value;
+        if (text == "") return;
         //var comment = {author: author, text: text};
-        var submitButton = this.refs.submitButton.getDOMNode();
-        submitButton.innerHTML = 'Posting comment...';
+        var submitButton = this.refs.submit.getDOMNode();
         submitButton.setAttribute('disabled', 'disabled');
         this.props.submitComment(text, function (err) {
             that.refs.text.getDOMNode().value = '';
-            submitButton.innerHTML = 'Post comment';
             submitButton.removeAttribute('disabled');
         });
     },
@@ -245,12 +244,13 @@ var CommentForm = React.createClass({
                 <form onSubmit={this.handleSubmit}>
                     <div className="message-box">
                         <input type="text"
+                               ref="text"
                                className="form-control"
                                placeholder="Send a Message"
                                maxlength="200"/>
                     </div>
                     <div className="message-button">
-                        <button type="submit" className="btn btn-primary">
+                        <button ref="submit" type="submit" className="btn btn-primary">
                             <i className='fa fa-paper-plane'></i>
                         </button>
                     </div>
