@@ -386,8 +386,6 @@ var QueuePane = React.createClass({
 	}
 });
 
-
-
 var QueueItem = React.createClass({
 	render: function() {
 		return (
