@@ -527,13 +527,26 @@ var SearchItem = React.createClass({
 
 		// Adds the track ID to queue
 		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		queue.push({APIref: id, date: Date.now()});
+		var request = new XMLHttpRequest();
+		request.open('GET', 'https://api.soundcloud.com/tracks/' + id + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+		request.onload = function() {
+			if (request.status >= 200 && request.status < 400) {
+				var data = JSON.parse(request.responseText);
+				queue.push({APIref: id, date: Date.now(),length:data.duration});
+			} else {
+				//handle failure from server
+			}
+		};
 
+		request.onerror = function() {
+			//connection problem
+		};
+
+		request.send();
 		this.props.owner.reset();
 	},
 	render: function() {
 		return (
-
 			<span>
 			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
 			</span>
