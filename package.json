@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-	"start": "node server/index.js"
+    "start": "node server/index.js",
+    "prod": "export PORT=80 && node server/index.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/JakeCooper/LiveMixr/issues"
   },
-  "homepage": "https://github.com/JakeCooper/LiveMixr#readme"
+  "homepage": "https://github.com/JakeCooper/LiveMixr#readme",
+  "dependencies": {
+    "express": "^4.13.4",
+    "http": "0.0.0",
+    "socket.io": "^1.4.5"
+  }
 }
