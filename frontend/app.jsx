@@ -495,7 +495,6 @@ var QueueWrapper = React.createClass({
 	}
 });
 
-
 var QueueItem = React.createClass({
 	render: function() {
 		return (
@@ -503,6 +502,8 @@ var QueueItem = React.createClass({
 		)
 	}
 });
+
+
 
 var SearchItem = React.createClass({
 	message: function(id) {
@@ -515,6 +516,7 @@ var SearchItem = React.createClass({
 	},
 	render: function() {
 		return (
+
 			<span>
 			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
 			</span>
