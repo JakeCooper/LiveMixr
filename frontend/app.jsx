@@ -498,9 +498,9 @@ var QueueWrapper = React.createClass({
 
 var QueueItem = React.createClass({
 	render: function() {
-		return {
-
-		}
+		return (
+			<div>{this.props.songInfo.title}</div>
+		)
 	}
 });
 
@@ -667,11 +667,11 @@ var PlayBar = React.createClass({
                     <div className="song-progress-complete"></div>
                 </div>
                 <div className="content">
-                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
+                    <img className="album-art" src={this.state.cover}/>
                     <div className="wrapper">
                         <div className="info">
-                            <p className="song">Take me back</p>
-                            <p className="artist-album">Nickelback - Here and Now</p>
+                            <p className="song">{this.state.title}</p>
+                            <p className="artist-album">{this.state.artist}</p>
                         </div>
                         <CounterComponent/>
                     </div>
@@ -681,7 +681,7 @@ var PlayBar = React.createClass({
 	}
 });
 
-	var CounterComponent = React.createClass({
+var CounterComponent = React.createClass({
 	updateSkip: function(){
 	//If the user has not tried to skip this song yet, increment his counter.
 		console.log("TEST")
