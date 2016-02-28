@@ -497,9 +497,17 @@ var QueueWrapper = React.createClass({
 
 
 var QueueItem = React.createClass({
+	message: function(id) {
+
+		// Adds the track ID to queue
+		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		queue.push({APIref: id, date: Date.now()});
+	},
 	render: function() {
 		return (
-			<div>{this.props.songInfo.title}</div>
+			<span>
+			{(this.props.track || false) ? <div className="queue-item" onClick={this.message.bind(this, this.props.track.id)}>{this.props.track.title}</div> : false}
+			</span>
 		)
 	}
 });
@@ -527,7 +535,9 @@ var SearchBox = React.createClass({
 		},500);
 
 	},
-
+	appendToQueue: function() {
+		console.log("test");
+	},
 	render: function() {
 		return (
 			<form className="navbar-form navbar-left" role="search">
@@ -539,7 +549,7 @@ var SearchBox = React.createClass({
 					{this.state.items.map(function(track, i) {
 						return (
 							<div>
-								{track.title}
+								<QueueItem track={track}/>
 							</div>
 						);	
 					})}
