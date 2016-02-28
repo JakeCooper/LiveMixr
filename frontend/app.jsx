@@ -319,14 +319,35 @@ var UserComponent = React.createClass({
 });
 
 var PlayerComponent = React.createClass({
+
 	render: function() {
 		return (
-			<div>PlayerComponent</div>
+			<div className="player-component">
+				<img className="album-art" src="/images/album.jpg"/>
+				<div className="album-name">Nickelback</div>
+				<div className="song-name">Here and Now - Take me back</div>
+				<CounterComponent/>
+			</div>
 		)
+	}
+});
+
+var CounterComponent = React.createClass({
+	updateSkip: function(){
+		//If the user has not tried to skip this song yet, increment his counter.
+		console.log("TEST")
+	},
+	render: function() {
+		return (
+			<div>
+				<div className="skip-counter">Counter</div>
+				<button className="btn btn-default skip-button" onClick={this.updateSkip}>Skip</button>
+			</div>
+			)
 	}
 });
 
 React.render(
 	<MainPage/>,
-	document.getElementById('content')
+	document.body
 );
