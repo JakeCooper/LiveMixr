@@ -48,11 +48,13 @@ var Oauth = React.createClass({
 		// If the first auth failed, then user will have to login
 		TriedAuth = true;
 
+
 		if (AuthResult && !AuthResult.error) {
 
             var that = this;
 
 			this.loadProfileInfo(function() {
+
 
 				 that.props.setAuthStatus({ name: that.state.ProfileName, image: that.state.ProfileImageUrl,
 				 							id: that.state.ProfileId });
@@ -109,23 +111,33 @@ var Oauth = React.createClass({
             <div className="splash">
                 <div className="container">
                     <div className="login-wrapper">
-                        <div className="login-header">
-                            <h1>
-                                Welcome to Mixr
-                            </h1>
-                        </div>
-                        <div className="login-description">
-                            Mixr makes music social. Joins tens of other users voting, talking and listening to the best music on the web.
-                        </div>
-                        <div className="login-auth">
-                            <button className="btn-google" type="submit" onClick={this.onLogin}>
-                                <i className="fa fa-google-plus"></i>
-                                <div>
-                                    <small>Sign in with</small><br/>
-                                    <big>Google</big>
-                                </div>
-                            </button>
-                        </div>
+                        <If test={this.state.TriedAuth}>
+                            <div className="login-header">
+                                <h1>
+                                    Welcome to Mixr
+                                </h1>
+                            </div>
+                            <div className="login-description">
+                                <div>{this.state.content}</div>
+                                Mixr makes music social. Joins tens of other users voting, talking and listening to the
+                                best music on the web.
+                            </div>
+                            <div className="login-auth">
+                                <button className="btn-google" type="submit" onClick={this.onLogin}>
+                                    <i className="fa fa-google-plus"></i>
+                                    <div>
+                                        <small>Sign in with</small>
+                                        <br/>
+                                        <big>Google</big>
+                                    </div>
+                                </button>
+                            </div>
+                        </If>
+                        <If test={!this.state.TriedAuth}>
+                            <div className="login-loading">
+                                <i className="fa fa-spinner fa-pulse"></i>
+                            </div>
+                        </If>
                     </div>
                 </div>
             </div>
@@ -269,7 +281,7 @@ var If = React.createClass({
 
 var MainPage = React.createClass({
 	getInitialState: function() {
-		return {isAuthd: false, userParams: null}
+		return {isAuthd: false, userParams: {}}
 	},
 
 	setAuthStatus: function(inParams) {
