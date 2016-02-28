@@ -637,18 +637,22 @@ var PlayBar = React.createClass({
 
 		socket.emit('getusercount');
 
-		socket.on('playnextsong', function() {
-			that.setSong();
+		socket.on('playnextsong', function(seek) {
+			that.setSong(seek);
+
+			console.log("seek " + seek);
 		});
 
 		this.returnCurrentSong();
 
-        this.setSong();
+		socket.emit('getseektime');
+
+        //this.setSong(0);
 
 		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
 	},
 
-	setSong: function() {
+	setSong: function(seektime) {
 
 
 
@@ -660,7 +664,8 @@ var PlayBar = React.createClass({
             });
 
             var player = SC.stream('/tracks/' + data.id).then(function (player) {
-                player.seek(data.time);
+            	console.log("seeking " + seektime);
+                player.seek(seektime);
                 player.play();
                 console.log(player);
             });

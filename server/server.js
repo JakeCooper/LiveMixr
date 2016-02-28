@@ -72,6 +72,7 @@ var skippers = [];
 
 var currentSong = undefined;
 var songFinish = undefined;
+var songStart = undefined;
 
 var allSongs = [];
 
@@ -97,7 +98,10 @@ var PlayNextSong = function() {
 	song = allSongs.shift();
 
 	currentSong = song.APIref;
-	songFinish = Date.now() + 1000 * 60;
+	songStart = (new Date).getTime();
+	songFinish = songStart + (song.length != undefined ? song.length : 1000 * 60);
+
+	console.log("finish " + songFinish);
 
 	RemoveSongByKey(song.key);
 
@@ -105,7 +109,7 @@ var PlayNextSong = function() {
 
 	sessions.forEach(function(sess) {
 
-		sess.emit("playnextsong");
+		sess.emit("playnextsong", 0);
 	});
 
 	songTimer = setTimeout(function() {
@@ -212,6 +216,14 @@ io.on('connection', function (socket) {
 
 			checkSkipPossible();
 		}
+	});
+
+	socket.on('getseektime', function() {
+
+		if(songFinish != undefined)
+			socket.emit("playnextsong", (new Date).getTime() - songStart);
+		else
+			socket.emit("playnextsong", 0);
 	});
 
 });
