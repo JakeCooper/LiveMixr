@@ -318,7 +318,7 @@ var Navbar = React.createClass({
 						<img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
 					</div>
 					<div className="navbar-title">
-						<h1>LiveMixr</h1>
+						<h1>Mixr</h1>
 					</div>
 					<div className="navbar-user">
 						{(this.props.authed == true
