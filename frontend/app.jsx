@@ -1,3 +1,36 @@
+var Oauth = React.createClass({
+	getInitialState: function () {
+		return {
+			RedirectURL: "http://livemixr.azurewebsites.net/",
+			ClientID: "870671781604-65ndlh54fkgpjsufkq2pmsn6rm3bvr8p.apps.googleusercontent.com",
+			CookiePolicy: "single_host_origin",
+			RequestVisibleActions: "http://schema.org/AddAction",
+			Scope: "https://www.googleapis.com/auth/plus.profile.emails.read"
+		};
+	},
+	onLogin: function() {
+	console.log(this.state.ClientID);
+	gapi.client.setApiKey("AIzaSyD4f3kc9MA9G4OU1z6zbeaGUOW5fjtt_5E");
+
+		var SigninData = { 
+			'client_id': this.state.ClientID,
+			'cookiepolicy': this.state.CookiePolicy,
+			'requestvisibleactions': this.state.RequestVisibleActions,
+			'scope': this.state.Scope
+		};
+
+		// lol good luck
+		gapi.auth.authorize( 
+			SigninData
+		);
+	},
+	render: function() {
+		return (
+				<button type="submit" onClick={this.onLogin}>Login</button>
+			)
+	}
+});
+
 var CommentBox = React.createClass({
 	getInitialState: function () {
 		return {
@@ -29,6 +62,7 @@ var CommentBox = React.createClass({
 		);
 	}
 });
+
 var CommentList = React.createClass({
 	render: function () {
 		var Comments = (<div>Loading comments...</div>);
@@ -73,11 +107,14 @@ var CommentForm = React.createClass({
 	},
 	render: function () {
 		return (
-			<form className="commentForm" onSubmit={this.handleSubmit}>
-				<input type="text" name="author" ref="author" placeholder="Name" required /><br/>
-				<textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-				<button type="submit" ref="submitButton">Post comment</button>
-			</form>
+			<div>
+				<form className="commentForm" onSubmit={this.handleSubmit}>
+					<input type="text" name="author" ref="author" placeholder="Name" required /><br/>
+					<textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
+					<button type="submit" ref="submitButton">Post comment</button>
+				</form>
+				<Oauth/>
+			</div>
 		);
 	}
 });
