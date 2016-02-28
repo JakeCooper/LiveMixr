@@ -1,34 +1,18 @@
 <html>
 	<head>
-		<title>Hello React</title>
+		<title>Mixr</title>
+		<script src="https://apis.google.com/js/client.js"></script>
 		<script src="http://fb.me/react-0.12.2.js"></script>
 		<script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
 		<script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
 		<script src="https://apis.google.com/js/client.js"></script>
 		<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 		<script src="https://cdn.firebase.com/libs/reactfire/0.6.0/reactfire.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="css/livemixr.min.css" />
 		<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
 	</head>
 	<body>
-        <div id="player">
-            <script>
-
-                SC.initialize({
-                    client_id: '562a196f46a9c2241f185373ee32d44a',
-                    redirect_uri: 'http://livemixr.azurewebsites.net/'
-                });
-
-                SC.stream('/tracks/293').then(function(player){
-                    player.play();
-                    console.log(player);
-                });
-            </script>
-        </div>
-
-		<div id="content"></div>
-		<script src="/socket.io/socket.io.js"></script>
 		<script type="text/jsx" src="app.jsx"></script>
-
 	</body>
 </html> 

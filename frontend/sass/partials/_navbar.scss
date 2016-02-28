@@ -30,9 +30,12 @@
 
 .navbar-header {
   @include clearfix;
-
-  @media (min-width: $grid-float-breakpoint) {
-    float: left;
+  @extend .col-sm-3;
+  @extend .col-xs-6;
+  padding: $navbar-padding-vertical/2 $navbar-padding-horizontal;
+  height: $navbar-height;
+  img {
+    height: 100%;
   }
 }
 
@@ -160,28 +163,42 @@
 
 // Brand/project name
 
-.navbar-brand {
-  float: left;
-  padding: $navbar-padding-vertical $navbar-padding-horizontal;
-  font-size: $font-size-large;
-  line-height: $line-height-computed;
+
+
+.navbar-title {
+  @extend .col-sm-6;
+  @extend .hidden-xs;
+
+  text-align: center;
+  h1 {
+    color: #fff;
+  }
+}
+
+.navbar-user {
+  @extend .col-sm-3;
+  @extend .col-xs-6;
+
+  text-align: right;
+  padding: $navbar-padding-vertical/2 $navbar-padding-horizontal;
   height: $navbar-height;
 
-  &:hover,
-  &:focus {
-    text-decoration: none;
+  img {
+    border-radius: 50%;
+    max-height: 100%;
   }
-
-  > img {
-    display: block;
+  .name {
+    font-size: $font-size-large;
+    display: inline-block;
+    padding: 7px;
+    color: #fff;
   }
-
   @media (min-width: $grid-float-breakpoint) {
-    .navbar > .container &,
-    .navbar > .container-fluid & {
-      margin-left: -$navbar-padding-horizontal;
-    }
+  .navbar > .container &,
+  .navbar > .container-fluid & {
+    margin-right: -$navbar-padding-horizontal;
   }
+}
 }
 
 

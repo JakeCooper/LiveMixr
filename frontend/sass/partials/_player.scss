@@ -1,0 +1,55 @@
+.playbar {
+  position:fixed;
+  bottom: 0px;
+
+  height: $playbar-height + $border-radius-base;
+
+  //border-top: solid $border-radius-base $gray;
+  background: $gray-dark;
+
+  width: 100%;
+
+  .song-progress {
+    height: $border-radius-base;
+    background: $gray;
+
+    .song-progress-complete {
+      background: $brand-primary;
+      height: $border-radius-base;
+      width: 60%;
+    }
+  }
+  .album-art {
+    height: $playbar-height;
+    width: $playbar-height;
+    float:left;
+  }
+  .wrapper {
+    margin-left: $playbar-height;
+    padding: $padding-base-vertical $padding-base-horizontal;
+    display: block;
+    height: $playbar-height;
+
+    .info {
+      color: #fff;
+      padding: $padding-large-vertical $padding-large-horizontal;
+      display: block;
+      height: 100%;
+
+      .song {
+        font-weight: bold;
+        font-size: $font-size-large*1.5;
+        margin: 0;
+        color: #fff;
+      }
+      .artist-album {
+        font-size: $font-size-large;
+        color: #fff;
+      }
+    }
+    .skip {
+    }
+    .skip-counter {
+    }
+  }
+}

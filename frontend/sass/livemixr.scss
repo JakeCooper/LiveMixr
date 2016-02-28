@@ -5,7 +5,6 @@
 // Reset and dependencies
 @import "partials/normalize";
 @import "partials/print";
-@import "partials/glyphicons";
 
 // Core CSS
 @import "partials/scaffolding";
@@ -18,6 +17,7 @@
 
 // Components
 @import "comments"; // TODO: Get rid of
+@import "partials/splash";
 @import "partials/component-animations";
 @import "partials/dropdowns";
 @import "partials/button-groups";
@@ -32,6 +32,11 @@
 @import "partials/jumbotron";
 @import "partials/thumbnails";
 @import "partials/alerts";
+@import "partials/player";
+@import "partials/browse";
+@import "partials/chat";
+@import "partials/queue";
+@import "partials/panes";
 @import "partials/progress-bars";
 @import "partials/media";
 @import "partials/list-group";
@@ -49,3 +54,6 @@
 // Utility classes
 @import "partials/utilities";
 @import "partials/responsive-utilities";
+
+// Bootswatch
+@import "partials/bootswatch";
