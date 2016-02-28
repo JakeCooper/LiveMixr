@@ -154,7 +154,7 @@ var CommentBox = React.createClass({
 		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
 
 		// Will pull the latest 5 messages, and then continue adding new messages
-		this.commentdb.limitToLast(5).on("child_added", function(snapshot, prevKey) {
+		this.commentdb.limitToLast(20).on("child_added", function(snapshot, prevKey) {
 
 			var newComment = snapshot.val();
 			var that = this;
@@ -185,9 +185,7 @@ var CommentBox = React.createClass({
 	},
 	render: function() {
 		return (
-			<div className="commentBox">
-				<h2>Hello {this.props.user.name}</h2>
-				<h3>Comments:</h3>
+			<div>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
 			</div>
@@ -204,7 +202,7 @@ var CommentList = React.createClass({
             });
         }
         return (
-            <div className="commentList">
+            <div className="message-list">
                 {Comments}
             </div>
         );
@@ -213,10 +211,14 @@ var CommentList = React.createClass({
 var Comment = React.createClass({
     render: function () {
         return (
-            <div className="comment">
-            	<span className="author-pic"><img src={this.props.comment.image}/></span>
-                <span className="author">{this.props.comment.author}</span> said:<br/>
-                <div className="body">{this.props.comment.text}</div>
+            <div className="message">
+                <div className="profile">
+                    <img src={this.props.comment.image}/>
+                </div>
+                <div className="content">
+                    <span className="author">{this.props.comment.author}</span>
+                    <div className="body">{this.props.comment.text}</div>
+                </div>
             </div>
         );
     }
@@ -239,10 +241,17 @@ var CommentForm = React.createClass({
     },
     render: function () {
         return (
-            <div>
-                <form className="commentForm" onSubmit={this.handleSubmit}>
-                    <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-                    <button type="submit" ref="submitButton">Post comment</button>
+            <div className="message-form">
+                <form onSubmit={this.handleSubmit}>
+                    <div className="message-box">
+                        <input type="text"
+                               className="form-control"
+                               placeholder="Send a Message"
+                               maxlength="200"/>
+                    </div>
+                    <button type="submit" className="btn btn-default">
+                        <i className='fa fa-paper-plane'></i>
+                    </button>
                 </form>
             </div>
         );
@@ -451,7 +460,7 @@ var PlayBar = React.createClass({
                 <div className="song-progress">
                     <div className="song-progress-complete"></div>
                 </div>
-                <div class="content">
+                <div className="content">
                     <img className="album-art" src="/img/Album-Placeholder.svg"/>
                     <div className="wrapper">
                         <div className="info">
