@@ -226,13 +226,16 @@ var CommentForm = React.createClass({
 var Navbar = React.createClass({
 	getInitialState: function () {
 		return {
-			
+
 		};
+	},
+	componentDidMount: function () {
+
 	},
 	render: function() {
 		return (
 			<div className="navbar navbar-default">
-				I am a navbar
+				<img src={this.props.image}/>{this.props.name}
 			</div>
 		)
 	}
@@ -251,7 +254,7 @@ var If = React.createClass({
 
 var MainPage = React.createClass({
 	getInitialState: function() {
-		return {isAuthd: false, userParams: null}
+		return {isAuthd: false, userParams: {}}
 	},
 
 	setAuthStatus: function(inParams) {
@@ -261,7 +264,7 @@ var MainPage = React.createClass({
 
 		return (
 			<div>
-				<Navbar userParams={this.state.userParams}/>
+				<Navbar image={this.state.userParams.image} name={this.state.userParams.name}/>
 				<If test={!this.state.isAuthd}>
 				<Oauth setAuthStatus={this.setAuthStatus}/>
 				</If>
