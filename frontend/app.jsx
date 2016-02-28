@@ -502,6 +502,8 @@ var QueueItem = React.createClass({
 		// Adds the track ID to queue
 		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
 		queue.push({APIref: id, date: Date.now()});
+
+		this.props.owner.reset();
 	},
 	render: function() {
 		return (
@@ -518,9 +520,10 @@ var SearchBox = React.createClass({
 	},
 	handleChange: function(sel) {
 		//console.log(sel);
-		clearTimeout(timeout);
 		var that = this;
-		var timeout = setTimeout(function() {
+		this.reset();
+		clearTimeout(this.timeout);
+		this.timeout = setTimeout(function() {
 
 			SC.initialize({
 				client_id: '562a196f46a9c2241f185373ee32d44a'
@@ -535,6 +538,9 @@ var SearchBox = React.createClass({
 		},500);
 
 	},
+	reset: function() {
+		this.setState({items: []});
+	},
 	appendToQueue: function() {
 		console.log("test");
 	},
@@ -546,13 +552,14 @@ var SearchBox = React.createClass({
 				</div>
 				<button type="submit" className="btn btn-default">Submit</button>
 				<div>
+					
 					{this.state.items.map(function(track, i) {
 						return (
 							<div>
-								<QueueItem track={track}/>
+								<QueueItem track={track} owner={this}/>
 							</div>
 						);	
-					})}
+					}.bind(this))}
 				</div>
 			</form>
 		)
