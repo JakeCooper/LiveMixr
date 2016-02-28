@@ -194,6 +194,16 @@ var CommentBox = React.createClass({
 });
 
 var CommentList = React.createClass({
+    componentWillUpdate: function() {
+        var node = this.getDOMNode();
+        this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+    },
+    componentDidUpdate: function() {
+        if (this.shouldScrollBottom) {
+            var node = this.getDOMNode();
+            node.scrollTop = node.scrollHeight
+        }
+    },
     render: function () {
         var Comments = (<div>Loading comments...</div>);
         if (this.props.comments) {
