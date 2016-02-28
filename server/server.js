@@ -1,45 +1,83 @@
 var path = require('path');
+var fs = require('fs');
 var express = require('express');
 
+// Server part
 var app = express();
+app.use('/', express.static(path.join(__dirname, '../frontend')));
 
-var port = normalizePort(process.env.PORT || '8080');
+var port = normalizePort(process.env.PORT || '4000');
 
-var staticPath = path.resolve(__dirname, '/public');
-app.use(express.static(staticPath));
+var server = app.listen(port);
+server.on('error', onError);
 
-var FrontendPath = __dirname + "/../frontend";
-var StaticPath = __dirname + "/../static";
+function onError(error) {
+	if (error.syscall !== 'listen') {
+		throw error;
+	}
 
-app.set('view engine', 'html');
+	var bind = typeof port === 'string'
+		? 'Pipe ' + port
+		: 'Port ' + port
 
-app.listen(port, function() {
-  console.log('New LiveMixr server on port ' + port);
-});
-
-app.get('/', function(req,res) {
-	
-	// For static files
-	app.use(express.static(path.resolve(StaticPath)));
-
-	// For dynamic js/css
-	app.use(express.static(path.resolve(FrontendPath)));
-	
-	res.sendFile(path.resolve(__dirname + '/../frontend/index.html'))
-})
+	// handle specific listen errors with friendly messages
+	switch (error.code) {
+		case 'EACCES':
+			console.error(bind + ' requires elevated privileges');
+			process.exit(1);
+			break;
+		case 'EADDRINUSE':
+			console.error(bind + ' is already in use');
+			process.exit(1);
+			break;
+		default:
+			throw error;
+	}
+}
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+	var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+	if (isNaN(port)) {
+		// named pipe
+		return val;
+	}
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+	if (port >= 0) {
+		// port number
+		return port;
+	}
 
-  return false;
+	return false;
 }
+
+console.log('Server listening on port ' + port);
+
+// Socket.IO part
+var io = require('socket.io')(server);
+
+var sendComments = function (socket) {
+	fs.readFile(path.resolve(__dirname + '/../_comments.json'), 'utf8', function(err, comments) {
+		comments = JSON.parse(comments);
+		socket.emit('comments', comments);
+	});
+};
+
+io.on('connection', function (socket) {
+  console.log('New client connected!');
+  
+  socket.on('fetchComments', function () {
+		sendComments(socket);
+	});
+
+	socket.on('newComment', function (comment, callback) {
+		fs.readFile('_comments.json', 'utf8', function(err, comments) {
+			comments = JSON.parse(comments);
+			comments.push(comment);
+			fs.writeFile('_comments.json', JSON.stringify(comments, null, 4), function (err) {
+				io.emit('comments', comments);
+				callback(err);
+			});
+		});
+	});
+});
