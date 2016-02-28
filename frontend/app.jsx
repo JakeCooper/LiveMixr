@@ -265,13 +265,14 @@ var Navbar = React.createClass({
             <div className="navbar navbar-default navbar-fixed-top">
                 <div className="container">
                     <div className="navbar-header">
-                        <a href="#" className="navbar-brand">
-                            <img src="img/LiveMixr-Logo.svg"/>
-                        </a>
+                        <img className="navbar-brand" src="img/LiveMixr-Logo.svg"/>
                     </div>
-
-                    <div className="nav navbar-nav navbar-right">
-                        <img src={this.props.image}/>{this.props.name}
+                    <div className="navbar-title">
+                        <h1>LiveMixr</h1>
+                    </div>
+                    <div className="navbar-user">
+                        <img alt={this.props.name} src={this.props.image}/>
+                        <span className="name">{this.props.name}</span>
                     </div>
                 </div>
             </div>
