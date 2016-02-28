@@ -326,7 +326,7 @@ var Navbar = React.createClass({
 								<div>
 									<img alt={this.props.user.name} src={this.props.user.image}/>
 									<span className="name">{this.props.user.name}</span>
-									<span className="name logout" onClick={this.logout}>Logout</span>
+									<span className="name logout"><a href="#" onClick={this.logout}>Logout</a></span>
 								</div>
 							: false
 						)}
