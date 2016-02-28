@@ -355,7 +355,7 @@ var QueuePane = React.createClass({
 	},
 	queueAppend: function(songUrl) {
 		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-		queue.push({APIref: "56796542", date: Date.now()})
+		queue.push({APIref: songUrl, date: Date.now()})
 	},
 
 	returnOrderedQueue: function(callback) {
