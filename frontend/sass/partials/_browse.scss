@@ -21,6 +21,17 @@
       }
     }
   }
+  .search-info {
+    @extend .col-md-4;
+    @extend .col-md-offset-4;
+    margin-top: 10*$line-height-computed;
+
+    &.search-loading {
+      text-align: center;
+      font-size: 60px;
+      color: $gray-light;
+    }
+  }
 
   .browse-song {
     min-height: $browse-album-height;

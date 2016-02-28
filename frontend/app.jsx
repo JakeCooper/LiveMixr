@@ -388,7 +388,10 @@ var ChatPane = React.createClass({
 
 var BrowsePane = React.createClass({
     getInitialState: function() {
-        return {items: [], searching: false}
+        return {items: [], searching: true, search: "*"}
+    },
+    componentWillMount: function (){
+        this.getTracks(this);
     },
     handleChange: function(sel) {
         clearTimeout(this.timeout);
@@ -397,21 +400,21 @@ var BrowsePane = React.createClass({
     handleSubmit: function (){
         if (this.state.searching) return;
         clearTimeout(this.timeout);
+        this.setState({ search: this.refs.searchtext.getDOMNode().value});
         this.getTracks(this);
     },
     getTracks: function(that) {
-
         SC.initialize({
             client_id: '562a196f46a9c2241f185373ee32d44a'
         });
 
-        this.setState({ searching: true });
+        this.setState({ searching: true});
         // find all sounds of buskers licensed under 'creative commons share alike'
         SC.get('/tracks', {
-            q: this.refs.searchtext.getDOMNode().value, license: 'cc-by-sa'
+            q: this.state.search, license: 'cc-by-sa'
         }).then(function(tracks) {
-            that.setState({ searching: false });
-            that.setState({items: tracks});
+            that.setState({items: []});
+            that.setState({ items: tracks, searching: false });
         });
     },
     reset: function() {
@@ -421,6 +424,25 @@ var BrowsePane = React.createClass({
         console.log("test");
     },
 	render: function() {
+        var tracks;
+        var search = this.state.search;
+        if (this.state.searching){
+            tracks =
+                <div className="search-info search-loading">
+                    <i className="fa fa-spinner fa-pulse"/>
+                </div>
+        } else if (this.state.items.length > 0){
+            tracks = this.state.items.map(function (track, i) {
+                return (<BrowseItem track={track} owner={this}/>);
+            }.bind(this));
+        } else {
+            tracks =
+                <div className="search-info search-error">
+                    <h2>Uh oh.</h2>
+                    <p>No songs found for <b>{search}</b>.</p>
+                </div>
+        }
+
 		return (
             <div className="pane browse-pane container">
                 <div className="row">
@@ -439,9 +461,7 @@ var BrowsePane = React.createClass({
                             </div>
                             <div className="search-button">
                                 <button ref="submit" type="submit" className="btn btn-primary">
-                                    { this.state.searching ?
-                                        <i className='fa fa-cog fa-spin'></i>
-                                        : <i className='fa fa-search'></i> }
+                                    <i className='fa fa-search'></i>
                                 </button>
                             </div>
                         </form>
@@ -449,13 +469,7 @@ var BrowsePane = React.createClass({
                 </div>
                 <div className="row">
                     <div className="col-lg-12">
-                        {this.state.items.map(function (track, i) {
-                            return (
-                                <div>
-                                    <BrowseItem track={track} owner={this}/>
-                                </div>
-                            );
-                        }.bind(this))}
+                        {tracks}
                     </div>
                 </div>
             </div>
