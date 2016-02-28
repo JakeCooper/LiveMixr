@@ -498,8 +498,18 @@ var QueueWrapper = React.createClass({
 var QueueItem = React.createClass({
 	render: function() {
 		return (
-			<div>{this.props.songInfo.title}</div>
-		)
+            <div className="queue-song panel panel-default">
+                <div className="album-art">
+                    <img src={this.props.songInfo.artwork_url || "/img/Album-Placeholder.svg"}/>
+                </div>
+                <div className="content">
+                    <div className="info">
+                        <div className="title">{this.props.songInfo.title}</div>
+                        <div className="user">{this.props.songInfo.user.username}</div>
+                    </div>
+                </div>
+            </div>
+        )
 	}
 });
 
@@ -562,13 +572,13 @@ var SearchBox = React.createClass({
 				</div>
 				<button type="submit" className="btn btn-default">Submit</button>
 				<div>
-					
+
 					{this.state.items.map(function(track, i) {
 						return (
 							<div>
 								<SearchItem track={track} owner={this}/>
 							</div>
-						);	
+						);
 					}.bind(this))}
 				</div>
 			</form>
