@@ -5,7 +5,9 @@ var Oauth = React.createClass({
 			ClientID: "870671781604-65ndlh54fkgpjsufkq2pmsn6rm3bvr8p.apps.googleusercontent.com",
 			CookiePolicy: "single_host_origin",
 			RequestVisibleActions: "http://schema.org/AddAction",
-			Scope: "https://www.googleapis.com/auth/plus.profile.emails.read"
+			Scope: "https://www.googleapis.com/auth/plus.profile.emails.read",
+			ProfileName: null,
+			ProfileImageUrl: null
 		};
 	},
 	onLogin: function() {
@@ -28,13 +30,40 @@ var Oauth = React.createClass({
 	onAuthCallback: function(AuthResult) {
 		if (AuthResult && !AuthResult.error) {
 
-			React.render(
-				<CommentBox/>,
-				document.getElementById('content')
-			);
+			var that = this;
+
+			this.loadProfileInfo(function() {
+
+				React.render(
+					<CommentBox profileName={that.state.ProfileName}/>,
+					document.getElementById('content')
+				);
+			});
+			
 		} else {
 			this.setState({content:"Auth Failed!"});
 		}
+	},
+	loadProfileInfo: function(callback) {
+
+		var that = this;
+
+		gapi.client.load('plus', 'v1').then(function() {
+			var request = gapi.client.plus.people.get({
+				'userId': 'me'
+			});
+
+			request.then(function(resp) {
+
+				that.state.ProfileName = resp.result.displayName;
+				that.state.ProfileImageUrl = resp.result.image.url;
+
+				callback();
+
+			}, function(reason) {
+				console.log('Error: ' + reason.result.error.message);
+			});
+		});
 	},
 	render: function() {
 		return (
@@ -70,6 +99,7 @@ var CommentBox = React.createClass({
 	render: function() {
 		return (
 			<div className="commentBox">
+				<h2>Hello {this.props.profileName}</h2>
 				<h3>Comments:</h3>
 				<CommentList comments={this.state.comments}/>
 				<CommentForm submitComment={this.submitComment}/>
