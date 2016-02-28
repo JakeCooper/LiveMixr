@@ -338,7 +338,9 @@ var ChatPane = React.createClass({
 var BrowsePane = React.createClass({
 	render: function() {
 		return (
-			<div className="browse-pane">BrowsePane</div>
+			<div className="browse-pane">
+				<SearchBox/>
+			</div>
 		)
 	}
 });
@@ -350,6 +352,51 @@ var QueuePane = React.createClass({
 		)
 	}
 });
+
+var SearchBox = React.createClass({
+	handleChange: function(sel) {
+		console.log(sel);
+		clearTimeout(timeout);
+		var timeout = setTimeout(function() {
+			var value = sel.target.value;
+
+
+			SC.initialize({
+				client_id: '562a196f46a9c2241f185373ee32d44a'
+			});
+
+			// find all sounds of buskers licensed under 'creative commons share alike'
+			SC.get('/tracks', {
+				q: sel.val, license: 'cc-by-sa'
+			}).then(function(tracks) {
+				console.log("here");
+				console.log(tracks);
+			});
+		},500).bind(this);
+
+	},
+
+	render: function() {
+		return (
+			<form className="navbar-form navbar-left" role="search">
+				<div className="form-group">
+					<input type="text" onChange={this.handleChange.bind(this)} className="form-control" placeholder="Search"/>
+				</div>
+				<button type="submit" className="btn btn-default">Submit</button>
+			</form>
+		)
+	}
+})
+//
+//var SearchResults = React.createClass({
+//	handleSearch: function() {
+//		console.out("TEST");
+//	},
+//
+//	render: function() {
+//		<div className="search-results">handleSearch</div>
+//	}
+//})
 
 var UserComponent = React.createClass({
 	render: function() {
