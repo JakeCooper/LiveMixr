@@ -318,11 +318,11 @@ var MainPage = React.createClass({
 var Explore = React.createClass({
 	render: function() {
 		return (
-			<div className="explore-pane">
+			<div className="container container-explore">
+                <BrowsePane/>
 				<ChatPane/>
-				<BrowsePane/>
 				<QueuePane/>
-				<PlayerComponent/>
+				<PlayBar/>
 			</div>
 		)
 	}
@@ -331,7 +331,7 @@ var Explore = React.createClass({
 var ChatPane = React.createClass({
 	render: function() {
 		return (
-			<div className="chat-pane">ChatPane</div>
+			<div className="pane chat-pane">ChatPane</div>
 		)
 	}
 });
@@ -339,7 +339,7 @@ var ChatPane = React.createClass({
 var BrowsePane = React.createClass({
 	render: function() {
 		return (
-			<div className="browse-pane">BrowsePane</div>
+			<div className="pane browse-pane">BrowsePane</div>
 		)
 	}
 });
@@ -347,7 +347,7 @@ var BrowsePane = React.createClass({
 var QueuePane = React.createClass({
 	render: function() {
 		return (
-			<div className="queue-pane">QueuePane</div>
+			<div className="pane queue-pane">QueuePane</div>
 		)
 	}
 });
@@ -360,11 +360,11 @@ var UserComponent = React.createClass({
 	}
 });
 
-var PlayerComponent = React.createClass({
+var PlayBar = React.createClass({
 
 	render: function() {
 		return (
-			<div className="player-component">
+			<div className="playbar">
 				<img className="album-art" src="/images/album.jpg"/>
 				<div className="album-name">Nickelback</div>
 				<div className="song-name">Here and Now - Take me back</div>
