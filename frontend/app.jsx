@@ -1,3 +1,5 @@
+var socket = io();
+
 var Oauth = React.createClass({
 	getInitialState: function () {
 		return {
@@ -32,6 +34,10 @@ var Oauth = React.createClass({
 			this.onAuthCallback
 		);
 
+	},
+	getUserId: function() {
+
+		return this.state.ProfileId;
 	},
 	onLogin: function() {
 
@@ -370,7 +376,7 @@ var Explore = React.createClass({
 				<ChatPane user={this.props.user}/>
 				<BrowsePane/>
 				<QueuePane isAuthd={this.props.isAuthd}/>
-				<PlayBar/>
+				<PlayBar user={this.props.user}/>
 			</div>
 		)
 	}
@@ -669,23 +675,55 @@ var UserComponent = React.createClass({
 });
 
 var PlayBar = React.createClass({
+
 	getInitialState: function() {
+		return {
+			listeners: 0
+		}
+	},
+	componentDidMount: function () {
+
+		var that = this;
+
+		socket.on('updateusercount', function(count) {
+			that.setState({listeners: count});
+		});
+
+		socket.emit('getusercount');
+
+		socket.on('playnextsong', function(seek) {
+			that.setSong(seek);
+
+			console.log("seek " + seek);
+		});
+
 		this.returnCurrentSong();
+
+		socket.emit('getseektime');
+
+        //this.setSong(0);
+
 		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
 	},
 
+	setSong: function(seektime) {
 
-	setSong: function() {
-		SC.initialize({
-			client_id: '562a196f46a9c2241f185373ee32d44a',
-			redirect_uri: 'http://livemixr.azurewebsites.net/'
-		});
 
-		var player = SC.stream('/tracks/' + currSong.id).then(function (player) {
-			player.seek(currSong.time);
-			player.play();
-			console.log(player);
-		});
+
+        this.returnCurrentSong(function(data){
+            console.log(data);
+            SC.initialize({
+                client_id: '562a196f46a9c2241f185373ee32d44a',
+                redirect_uri: 'http://livemixr.azurewebsites.net/'
+            });
+
+            var player = SC.stream('/tracks/' + data.id).then(function (player) {
+            	console.log("seeking " + seektime);
+                player.seek(seektime);
+                player.play();
+                console.log(player);
+            });
+        });
 	},
 
 	muteSong: function() {
@@ -704,7 +742,8 @@ var PlayBar = React.createClass({
 		console.log("fix this too");
 	},
 
-	returnCurrentSong: function() {
+	returnCurrentSong: function(callback) {
+        callback = callback || function() {return false};
 		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
 		var that = this;
 		queue.on("value", function(payload) {
@@ -722,7 +761,8 @@ var PlayBar = React.createClass({
 				if (request.status >= 200 && request.status < 400) {
 					var data = JSON.parse(request.responseText);
 					that.setState({title:data.title,artist:data.user.username,cover:data.artwork_url})
-				} else {
+				    callback(data);
+                } else {
 					//handle failure from server
 				}
 			};
@@ -734,8 +774,6 @@ var PlayBar = React.createClass({
 			request.send();
 		})
 	},
-
-
 	render: function() {
 		return (
             <div className="playbar">
@@ -748,8 +786,9 @@ var PlayBar = React.createClass({
                         <div className="info">
                             <p className="song">{this.state.title}</p>
                             <p className="artist-album">{this.state.artist}</p>
+                            <div>{this.state.listeners} users listening</div>
+                            <CounterComponent user={this.props.user}/>
                         </div>
-                        <CounterComponent/>
                     </div>
                 </div>
             </div>
@@ -758,17 +797,31 @@ var PlayBar = React.createClass({
 });
 
 var CounterComponent = React.createClass({
+	getInitialState: function() {
+		return {
+			skippers: 0
+		}
+	},
+	componentDidMount: function () {
+
+		var that = this;
+
+		socket.on('updateskipcount', function(count) {
+			that.setState({skippers: count});
+		});
+	},
 	updateSkip: function(){
 	//If the user has not tried to skip this song yet, increment his counter.
 		console.log("TEST")
+
+		socket.emit('skipsong', this.props.user.id);
 	},
 		render: function() {
 		return (
-			<div>
-				<div className="skip-counter">Counter</div>
-				<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
-			</div>
-			)
+			<span className="skip-button-container">
+				<button className="btn btn-default skip" onClick={this.updateSkip}>{this.state.skippers} Skips</button>
+			</span>
+		)
 	}
 });
 
