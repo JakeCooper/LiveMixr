@@ -2,30 +2,54 @@
   position:fixed;
   bottom: 0px;
 
-  height: $playbar-height;
+  height: $playbar-height + $border-radius-base;
 
-  border: 1px solid black;
+  //border-top: solid $border-radius-base $gray;
+  background: $gray-dark;
+
   width: 100%;
 
+  .song-progress {
+    height: $border-radius-base;
+    background: $gray;
+
+    .song-progress-complete {
+      background: $brand-primary;
+      height: $border-radius-base;
+      width: 60%;
+    }
+  }
   .album-art {
-    width: 7%;
+    height: $playbar-height;
+    width: $playbar-height;
     float:left;
   }
-  .album-name {
-    margin-top: 1.6%;
-    margin-bottom: 1%;
-    margin-left: 10%;
-  }
-  .song-name {
-    margin-left: 10%;
-  }
-  .skip-button {
-    position:fixed;
-    margin-left: 45%;
-    margin-top: -3%;
-  }
-  .skip-counter {
-    margin-left: 80%;
-    margin-top: -2.5%;
+  .wrapper {
+    margin-left: $playbar-height;
+    padding: $padding-base-vertical $padding-base-horizontal;
+    display: block;
+    height: $playbar-height;
+
+    .info {
+      color: #fff;
+      padding: $padding-large-vertical $padding-large-horizontal;
+      display: block;
+      height: 100%;
+
+      .song {
+        font-weight: bold;
+        font-size: $font-size-large*1.5;
+        margin: 0;
+        color: #fff;
+      }
+      .artist-album {
+        font-size: $font-size-large;
+        color: #fff;
+      }
+    }
+    .skip {
+    }
+    .skip-counter {
+    }
   }
 }

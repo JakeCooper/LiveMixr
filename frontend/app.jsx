@@ -369,12 +369,21 @@ var PlayBar = React.createClass({
 
 	render: function() {
 		return (
-			<div className="playbar">
-				<img className="album-art" src="/images/album.jpg"/>
-				<div className="album-name">Nickelback</div>
-				<div className="song-name">Here and Now - Take me back</div>
-				<CounterComponent/>
-			</div>
+            <div className="playbar">
+                <div className="song-progress">
+                    <div className="song-progress-complete"></div>
+                </div>
+                <div class="content">
+                    <img className="album-art" src="/img/Album-Placeholder.svg"/>
+                    <div className="wrapper">
+                        <div className="info">
+                            <p className="song">Take me back</p>
+                            <p className="artist-album">Nickelback - Here and Now</p>
+                        </div>
+                        <CounterComponent/>
+                    </div>
+                </div>
+            </div>
 		)
 	}
 });
@@ -388,7 +397,7 @@ var CounterComponent = React.createClass({
 		return (
 			<div>
 				<div className="skip-counter">Counter</div>
-				<button className="btn btn-default skip-button" onClick={this.updateSkip}>Skip</button>
+				<button className="btn btn-default skip" onClick={this.updateSkip}>Skip</button>
 			</div>
 			)
 	}
