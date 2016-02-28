@@ -490,6 +490,7 @@ var BrowseItem = React.createClass({
     },
     render: function() {
         var added = this.state.added;
+        desclen = 180;
         var track = this.props.track;
         var button = {
             icon: 'fa fa-' + (added ? 'check' : 'plus'),
@@ -516,7 +517,8 @@ var BrowseItem = React.createClass({
                                 </a>
                             </div>
                             <div className="description">
-                                {track.description}
+                                {track.description.length < desclen ?
+                                    track.description : track.description.slice(0, desclen) + "..."}
                             </div>
                             <div className="controls">
                                 <button className={button.class} disabled={added}
