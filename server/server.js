@@ -158,11 +158,29 @@ io.on('connection', function (socket) {
 
 	console.log("connected user");
 
+	socket.profile_id = 0;
+	socket.authenticated = false;
+
 	sessions.push(socket);
 
 	io.sockets.emit('updateusercount', sessions.length);
 
 	console.log(sessions.length);
+
+	var getUniqueListeners = function() {
+
+		var listeners = [];
+
+		// Get number of unique listeners
+		for (var i = 0; i < sessions.length; i++) {
+
+			if (sessions[i].authenticated && sessions[i].profile_id
+			   && listeners.indexOf(sessions[i].profile_id) == -1)
+				listeners.push(sessions[i].profile_id);
+		}
+
+		return listeners.length;
+	};
 
 	var sendSkipCount = function() {
 
@@ -171,7 +189,11 @@ io.on('connection', function (socket) {
 
 	var checkSkipPossible = function() {
 
-		if(skippers.length > sessions.length * skipRatio) {
+		var uniques = getUniqueListeners();
+
+		console.log(sessions.length + " total listeners and " + skippers.length + " skippers but " + uniques + " are unique (needed skips)");
+
+		if (skippers.length >= uniques * skipRatio) {
 
 			console.log("skipping song");
 
@@ -181,12 +203,24 @@ io.on('connection', function (socket) {
 		}
 	};
 
+	socket.on('login', function(profile) {
+
+		socket.profile_id = profile;
+		socket.authenticated = true;
+
+		// TODO: Verify profile ID in firebase
+	});
+
 	socket.on('disconnect', function(){
 
 		console.log("disconnected user");
 
-		// Remove from 
-		sessions.splice( sessions.indexOf(socket), 1);
+		var idx = sessions.indexOf(socket);
+
+		if(idx === -1)
+			return;
+
+		sessions.splice(idx, 1);
 
 		io.sockets.emit('updateusercount', sessions.length);
 
@@ -198,17 +232,17 @@ io.on('connection', function (socket) {
 		socket.emit('updateusercount', sessions.length);
 	});
 
-	socket.on('skipsong', function(user_id) {
+	socket.on('skipsong', function() {
 
-		if(user_id == undefined)
+		if(socket.authenticated === false)
 			return;
 
-		console.log("skippers " + user_id);
+		console.log("skippers " + socket.profile_id);
 
 		// Make sure no duplicate skippers
-		if(skippers.indexOf(user_id) == -1) {
+		if(skippers.indexOf(socket.profile_id) == -1) {
 
-			skippers.push(user_id);
+			skippers.push(socket.profile_id);
 
 			console.log("skippers: " + skippers.length);
 

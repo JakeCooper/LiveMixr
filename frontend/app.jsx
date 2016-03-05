@@ -98,7 +98,9 @@ var Oauth = React.createClass({
 					}
 				});
 
-                callback();
+				socket.emit('login', that.state.ProfileId);
+
+				callback();
 
             }, function (reason) {
                 console.log('Error: ' + reason.result.error.message);
@@ -653,8 +655,6 @@ var PlayBar = React.createClass({
 	},
 
 	setSong: function(seektime) {
-
-
 
         this.returnCurrentSong(function(data){
             SC.initialize({
