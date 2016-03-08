@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var express = require('express');
+var FirebaseTokenGenerator = require("firebase-token-generator");
 
 // Server part
 var app = express();
@@ -58,11 +59,46 @@ function normalizePort(val) {
 
 console.log('Server listening on port ' + port);
 
-// Socket.IO part
+var firebaseSecretKey;
+
+// Read file to get Firebase secret key
+try {
+	firebaseSecretKey = fs.readFileSync('firebase.secret').toString();
+
+	console.log("Using file 'firebase.secret' as source for firebase secret key");
+}
+catch(e) {
+
+	if(process.env.FIREBASE_SECRET !== undefined) {
+
+		firebaseSecretKey = process.env.FIREBASE_SECRET;
+
+		console.log("Using environment variable as source for firebase secret key");
+	}
+	else {
+
+		throw "Firebase secret key is not available in the file 'firebase.secret' or as an environment variable";
+	}	
+}
+
+var tokenGenerator = new FirebaseTokenGenerator(firebaseSecretKey);
+
 var io = require('socket.io')(server);
 var Firebase = require("firebase");
 
-var db = new Firebase("https://saqaf086r05.firebaseio-demo.com");
+// This is the server side database connection
+var db = new Firebase("https://livemixr.firebaseio.com/");
+
+// Auth on server side is done directly with the secret key. This grants full read/write access
+db.authWithCustomToken(firebaseSecretKey, function(error) {
+	if(error != null) {
+		console.log(error);
+		throw "Error while authenticating to firebase. Secret key may be incorrect or expired";
+	}
+
+	console.log("Server is authenticated to firebase with secret key");
+});
+
 
 var skipRatio = 0.8; // 80% of skips required
 
@@ -203,15 +239,24 @@ io.on('connection', function (socket) {
 		}
 	};
 
-	socket.on('login', function(profile) {
+	socket.on('login', function(profile, callback) {
 
 		socket.profile_id = profile;
 		socket.authenticated = true;
 
 		// TODO: Verify profile ID in firebase
+
+		// TODO: For added security, this function should receive the current G+ auth token
+		// that the user is logged in with, and make a G+ API call to actually verify the auth token is valid.
+		// That way, the server can validate the logged in user making this login request is correctly authenticated to do so
+
+		// A users G+ profile ID is what is used as the unique ID for this user to access the database from the client side
+		var token = tokenGenerator.createToken({ uid: socket.profile_id });
+
+		callback(true, token);
 	});
 
-	socket.on('disconnect', function(){
+	socket.on('disconnect', function() {
 
 		console.log("disconnected user");
 

@@ -3,7 +3,7 @@ var socket = io();
 var Oauth = React.createClass({
 	getInitialState: function () {
 		return {
-			RedirectURL: "http://livemixr.azurewebsites.net/",
+			RedirectURL: "http://mixr.online/",
 			ClientID: "870671781604-65ndlh54fkgpjsufkq2pmsn6rm3bvr8p.apps.googleusercontent.com",
 			CookiePolicy: "single_host_origin",
 			RequestVisibleActions: "http://schema.org/AddAction",
@@ -27,7 +27,6 @@ var Oauth = React.createClass({
 			'scope': this.state.Scope,
 			'immediate': true // Means we want to instantly know if user is authed or not
 		};
-
 
 		gapi.auth.authorize(
 			this.SigninData,
@@ -86,21 +85,39 @@ var Oauth = React.createClass({
 				that.state.ProfileImageUrl = resp.result.image.url;
 				that.state.ProfileId = resp.result.id;
 
-				// Save data to firebase
-				that.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users/' + that.state.ProfileId);
+				socket.emit('login', that.state.ProfileId, function(success, authToken) {
 
-				// Load the user value
-				that.userdb.once('value', function(user) {
-
-					// See if this user has been persisted to the db. If not, save their data
-					if(!user.hasChild("id")) {
-						that.userdb.set({name: that.state.ProfileName, id: that.state.ProfileId, profile_url: that.state.ProfileImageUrl});
+					if(success === false) {
+						console.log("Failed to generate authentication token!");
+						return;
 					}
+
+					that.userdb = new Firebase('https://livemixr.firebaseio.com/users/' + that.state.ProfileId);
+
+					// Authenticate with token received from server
+					var promise = that.userdb.authWithCustomToken(authToken).then(function(data) {
+
+						//if(error != null) {
+						//	console.log(error);
+						//	console.log("Failed to authenticate to firebase using token");
+						//	return;
+						//}
+
+						// Load the user value
+						that.userdb.once('value', function(user) {
+
+							// See if this user has been persisted to the db. If not, save their data
+							if(!user.hasChild("id")) {
+								that.userdb.set({name: that.state.ProfileName, id: that.state.ProfileId, profile_url: that.state.ProfileImageUrl});
+							}
+						}, function(error) {
+							console.log(error);
+							console.log("Failed to read/update user in database; insufficient permissions?");
+						});
+				
+						callback();
+					});
 				});
-
-				socket.emit('login', that.state.ProfileId);
-
-				callback();
 
             }, function (reason) {
                 console.log('Error: ' + reason.result.error.message);
@@ -158,8 +175,8 @@ var CommentBox = React.createClass({
 	},
 	componentDidMount: function () {
 
-		this.commentdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/comments');
-		this.userdb = new Firebase('https://saqaf086r05.firebaseio-demo.com/users');
+		this.commentdb = new Firebase('https://livemixr.firebaseio.com/comments');
+		this.userdb = new Firebase('https://livemixr.firebaseio.com/users');
 
 		var that = this;
 		var first = true;
@@ -212,7 +229,7 @@ var CommentBox = React.createClass({
 		this.commentdb.push({
 			author: this.props.user.id,
 			text: comment,
-			timestamp: (new Date).getTime()
+			timestamp: Firebase.ServerValue.TIMESTAMP
 		});
 
 		callback();
@@ -493,16 +510,18 @@ var BrowseItem = React.createClass({
     getInitialState: function() {
         return {added: false}
     },
+    componentDidMount: function () {
+    	this.queue = new Firebase('https://livemixr.firebaseio.com/queue/');
+    },
     message: function(track) {
 
         // Adds the track ID to queue
-        var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
-        queue.push(
+        this.queue.push(
             {
                 APIref: track.id,
                 title: track.title,
                 duration: track.duration,
-                date: Date.now(),
+                date: Firebase.ServerValue.TIMESTAMP,
                 song: track
             }
         );
@@ -510,7 +529,7 @@ var BrowseItem = React.createClass({
     },
     render: function() {
         var added = this.state.added;
-        desclen = 180;
+        var desclen = 180;
         var track = this.props.track;
         var button = {
             icon: 'fa fa-' + (added ? 'check' : 'plus'),
@@ -557,14 +576,21 @@ var BrowseItem = React.createClass({
 
 var QueuePane = React.createClass({
 	getInitialState: function() {
-        this.listenQueueChanges();
-		return {queue: []};
+     
+		return {
+			queue: []
+		};
 	},
+	componentDidMount: function() {
+		this.fireQueue = new Firebase('https://livemixr.firebaseio.com/queue/');
 
+		this.listenQueueChanges();
+	},
 	listenQueueChanges: function(callback) {
-		var fireQueue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+
 		var that = this;
-		fireQueue.on("value", function(payload) {
+
+		this.fireQueue.on("value", function(payload) {
 			var queue = [];
 			payload.forEach(function(data){
 				queue.push(data.val());
@@ -633,6 +659,8 @@ var PlayBar = React.createClass({
 	},
 	componentDidMount: function () {
 
+		this.queue = new Firebase('https://livemixr.firebaseio.com/queue/');
+
 		var that = this;
 
 		socket.on('updateusercount', function(count) {
@@ -687,23 +715,23 @@ var PlayBar = React.createClass({
 
 	returnCurrentSong: function(callback) {
         callback = callback || function() {return false};
-		var queue = new Firebase('https://saqaf086r05.firebaseio-demo.com/queue/');
+		
 		var that = this;
-		queue.on("value", function(payload) {
-			var queue = [];
+		this.queue.on("value", function(payload) {
+			var queued = [];
 			payload.forEach(function(data){
-				queue.push(data);
+				queued.push(data);
 			});
-			queue.sort(function(a,b){
+			queued.sort(function(a,b){
 				return a.date > b.date
 			});
 
 			// No song available in queue
-			if(queue[0] == undefined)
+			if(queued[0] == undefined)
 				return;
 
 			var request = new XMLHttpRequest();
-			request.open('GET', 'https://api.soundcloud.com/tracks/' + queue[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
+			request.open('GET', 'https://api.soundcloud.com/tracks/' + queued[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
 			request.onload = function() {
 				if (request.status >= 200 && request.status < 400) {
 					var data = JSON.parse(request.responseText);
