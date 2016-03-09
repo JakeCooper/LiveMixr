@@ -588,7 +588,7 @@ var QueuePane = React.createClass({
 
 		this.listenQueueChanges();
 	},
-	listenQueueChanges: function(callback) {
+	listenQueueChanges: function() {
 
 		var that = this;
 
@@ -661,7 +661,13 @@ var PlayBar = React.createClass({
 	},
 	componentDidMount: function () {
 
+        SC.initialize({
+            client_id: '562a196f46a9c2241f185373ee32d44a'
+        });
+
 		this.queue = new Firebase('https://livemixr.firebaseio.com/queue/');
+		this.player = undefined;
+		this.promise = undefined;
 
 		var that = this;
 
@@ -669,88 +675,50 @@ var PlayBar = React.createClass({
 			that.setState({listeners: count});
 		});
 
+		// Request user count from server
 		socket.emit('getusercount');
 
-		socket.on('playnextsong', function(seek) {
-			that.setSong(seek);
+		// Called when server tells the client to play a song. Has the current seek time and full data of the song
+		socket.on('playnextsong', function(seek, data) {
+
+			that.setSong(seek, data);
 		});
 
-		this.returnCurrentSong();
-
+		// This requests the current song from the server
 		socket.emit('getseektime');
-
-        //this.setSong(0);
-
-		return {title: null, artist:null,cover:"/img/Album-Placeholder.svg"}
 	},
 
-	setSong: function(seektime) {
+	setSong: function(seektime, data) {
 
-        this.returnCurrentSong(function(data){
-            SC.initialize({
-                client_id: '562a196f46a9c2241f185373ee32d44a',
-                redirect_uri: 'http://livemixr.azurewebsites.net/'
-            });
+		// This sets the song info on the player bar
+		this.setState({ title: data.title, artist: data.user.username, cover: data.artwork_url });
 
-            var player = SC.stream('/tracks/' + data.id).then(function (player) {
-                player.seek(seektime);
-                player.play();
-            });
+		// If a song is currently playing, pause it to stop the playback for the next song
+        if(this.player !== undefined)
+      		this.player.pause();
+
+        var that = this;
+
+        // This promise can be used to chain functions on the player when needed
+        this.promise = SC.stream('/tracks/' + data.id).then(function (player) {
+            
+            // Set the class instance to the new player
+        	that.player = player;
+
+        	player.on('play-start', function(ev) {
+
+        		// The html5 player expects the currentTime to be in seconds; we lose accuracy here
+        		// until a better way is figured out to change the song timing
+        		player.controller._html5Audio.currentTime = seektime / 1000.0;
+
+        	});
+
+            player.play();
+
+            return player;
         });
 	},
 
-	muteSong: function() {
-		player.setVolume(0);
-	},
-
-	unMuteSong: function() {
-		player.setVolume(1);
-	},
-
-	voteUp: function() {
-		console.log("fix this");
-	},
-
-	voteDown: function() {
-		console.log("fix this too");
-	},
-
-	returnCurrentSong: function(callback) {
-        callback = callback || function() {return false};
-		
-		var that = this;
-		this.queue.on("value", function(payload) {
-			var queued = [];
-			payload.forEach(function(data){
-				queued.push(data);
-			});
-			queued.sort(function(a,b){
-				return a.date > b.date
-			});
-
-			// No song available in queue
-			if(queued[0] == undefined)
-				return;
-
-			var request = new XMLHttpRequest();
-			request.open('GET', 'https://api.soundcloud.com/tracks/' + queued[0].val()["APIref"] + '.json?client_id=562a196f46a9c2241f185373ee32d44a')
-			request.onload = function() {
-				if (request.status >= 200 && request.status < 400) {
-					var data = JSON.parse(request.responseText);
-					that.setState({title:data.title,artist:data.user.username,cover:data.artwork_url})
-				    callback(data);
-                } else {
-					//handle failure from server
-				}
-			};
-
-			request.onerror = function() {
-				//connection problem
-			};
-
-			request.send();
-		})
-	},
 	render: function() {
 		return (
             <div className="playbar">
@@ -783,16 +751,18 @@ var CounterComponent = React.createClass({
 
 		var that = this;
 
+		// ask server for updated skip count
+		socket.emit('getskipcount');
+
 		socket.on('updateskipcount', function(count) {
 			that.setState({skippers: count});
 		});
 	},
 	updateSkip: function(){
-	//If the user has not tried to skip this song yet, increment his counter.
 
 		socket.emit('skipsong', this.props.user.id);
 	},
-		render: function() {
+	render: function() {
 		return (
 			<span className="skip-button-container">
 				<button className="btn btn-default skip" onClick={this.updateSkip}>{this.state.skippers} Skips</button>

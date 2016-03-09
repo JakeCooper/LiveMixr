@@ -135,21 +135,19 @@ var PlayNextSong = function() {
 	// remove from queue and grab next one
 	var song = allSongs.shift();
 
-	currentSong = song.APIref;
+	currentSong = song;
 	songStart = (new Date).getTime();
 	songFinish = songStart + (song.duration != undefined ? song.duration : 1000 * 60);
 
-	console.log("finish " + songFinish);
-
 	RemoveSongByKey(song.key);
 
-	console.log("playing song " + currentSong);
+	console.log("playing song: " + currentSong.song.title);
 
 	sessions.forEach(function(sess) {
 
-		sess.emit("playnextsong", 0);
+		sess.emit("playnextsong", 0, song.song);
 	});
-	;
+	
 	songTimer = setTimeout(function() {
 
 		PlayNextSong();
@@ -167,7 +165,6 @@ var RemoveSongByKey = function(key) {
 // queue bullshit
 
 db.child("queue").on("child_added", function(key, prev) {
-
 
 	// Add to queue
 
@@ -258,8 +255,6 @@ io.on('connection', function (socket) {
 
 	socket.on('disconnect', function() {
 
-		console.log("disconnected user");
-
 		var idx = sessions.indexOf(socket);
 
 		if(idx === -1)
@@ -269,7 +264,7 @@ io.on('connection', function (socket) {
 
 		io.sockets.emit('updateusercount', sessions.length);
 
-		console.log(sessions.length);
+		console.log("There are currently " + sessions.length + " connected users");
 	});
 
 	socket.on('getusercount', function() {
@@ -282,7 +277,7 @@ io.on('connection', function (socket) {
 		if(socket.authenticated === false)
 			return;
 
-		console.log("skippers " + socket.profile_id);
+		console.log("new skipper: " + socket.profile_id);
 
 		// Make sure no duplicate skippers
 		if(skippers.indexOf(socket.profile_id) == -1) {
@@ -300,9 +295,13 @@ io.on('connection', function (socket) {
 	socket.on('getseektime', function() {
 
 		if(songFinish != undefined)
-			socket.emit("playnextsong", (new Date).getTime() - songStart);
+			socket.emit("playnextsong", (new Date).getTime() - songStart, currentSong.song);
 		else
-			socket.emit("playnextsong", 0);
+			socket.emit("playnextsong", 0, currentSong.song);
+	});
+
+	socket.on('getskipcount', function() {
+		socket.emit('updateskipcount', skippers.length);
 	});
 
 });
