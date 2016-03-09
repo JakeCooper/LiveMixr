@@ -508,7 +508,9 @@ var BrowsePane = React.createClass({
 
 var BrowseItem = React.createClass({
     getInitialState: function() {
-        return {added: false}
+        return {
+        	added: false
+        }
     },
     componentDidMount: function () {
     	this.queue = new Firebase('https://livemixr.firebaseio.com/queue/');

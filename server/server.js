@@ -69,12 +69,14 @@ try {
 }
 catch(e) {
 
+	// If file doesn't exist, try to use an environment variable
 	if(process.env.FIREBASE_SECRET !== undefined) {
 
 		firebaseSecretKey = process.env.FIREBASE_SECRET;
 
 		console.log("Using environment variable as source for firebase secret key");
 	}
+	// Otherwise the server won't work until the secret key is added in some form
 	else {
 
 		throw "Firebase secret key is not available in the file 'firebase.secret' or as an environment variable";
@@ -192,8 +194,6 @@ db.child("queue").on("child_added", function(key, prev) {
 
 io.on('connection', function (socket) {
 
-	console.log("connected user");
-
 	socket.profile_id = 0;
 	socket.authenticated = false;
 
@@ -201,7 +201,7 @@ io.on('connection', function (socket) {
 
 	io.sockets.emit('updateusercount', sessions.length);
 
-	console.log(sessions.length);
+	console.log("There are currently " + sessions.length + " connected users");
 
 	var getUniqueListeners = function() {
 
