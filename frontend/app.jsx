@@ -85,6 +85,7 @@ var Oauth = React.createClass({
 				that.state.ProfileImageUrl = resp.result.image.url;
 				that.state.ProfileId = resp.result.id;
 
+				// Server will callback with an auth token used to connect to firebase securely
 				socket.emit('login', that.state.ProfileId, function(success, authToken) {
 
 					if(success === false) {
@@ -615,8 +616,8 @@ var QueuePane = React.createClass({
 	render: function() {
 		return (
 			<div className="pane queue-pane">
-				{this.state.queue.map(function(item) {
-					return <QueueItem key={item.APIref}
+				{this.state.queue.map(function(item, i) {
+					return <QueueItem key={i}
                                       song={item.song}
                                       APIref={item.APIref}/>
 				})}
@@ -790,7 +791,7 @@ var CounterComponent = React.createClass({
 	render: function() {
 		return (
 			<span className="skip-button-container">
-				<button className="btn btn-default" onClick={this.updateSkip}>{this.state.skippers} Skips</button>
+				<button className="btn btn-default" onClick={this.updateSkip}>{this.state.skippers} {this.state.skippers === 1 ? 'Skip' : 'Skips'}</button>
 			</span>
 		)
 	}
@@ -814,15 +815,15 @@ var VolumeComponent = React.createClass({
 	componentDidMount: function() {
 
 		window.addEventListener('dragstart', this.onDragStart);
-	    window.addEventListener('drag', this.onDrag);
-	    window.addEventListener('dragend', this.onDragEnd);
+		window.addEventListener('drag', this.onDrag);
+		window.addEventListener('dragend', this.onDragEnd);
 	},
 
 	componentWillUnmount: function() {
 
 		window.removeEventListener('dragstart', this.onDragStart);
-	    window.removeEventListener('ondrag', this.onDrag);
-	    window.removeEventListener('ondragend', this.onDragEnd);
+		window.removeEventListener('ondrag', this.onDrag);
+		window.removeEventListener('ondragend', this.onDragEnd);
 	},
 
 	showVolumeBar: function() {
@@ -877,7 +878,12 @@ var VolumeComponent = React.createClass({
 		this.setState({isDragging: false});
 	},
 
-	onToggleMute: function() {
+	onToggleMute: function(ev) {
+
+		// Only toggle if the actual button is clicked
+		if(ev.target.className !== this.refs.button.className)
+			return;
+
 		var muted = !this.state.isMuted;
 
 		// Use both methods to set state, as setState is asynchronous and when we use it in updateVolume(), it may not be set yet (race condition)
@@ -906,7 +912,7 @@ var VolumeComponent = React.createClass({
 
 		return (
 			<span className="volume-button" onClick={this.onToggleMute} onMouseEnter={this.showVolumeBar} onMouseLeave={this.hideVolumeBar}>
-				<i className={this.state.isMuted ? "fa fa-volume-off" : "fa fa-volume-up"}></i>
+				<i ref="button" className={this.state.isMuted ? "fa fa-volume-off" : "fa fa-volume-up"}></i>
 				{ this.state.showVolumeBar ? 
 					<div className="volume-container">
 						<div className="volume-bar">

@@ -63,18 +63,15 @@
         &:hover {
           background-color: #424242;
           border-radius: 4px;
-
         }
       }
 
       .volume-container {
-
         width: 140px;
         display: block;
         position: absolute;
         top: -30px;
         padding: 15px;
-        
 
         .volume-bar {
         background-color: #424242;
@@ -104,6 +101,7 @@
               top: 0;
               bottom: 0;
             }
+
             .volume-position {
               background-color: white;
               border: 3px solid white;
