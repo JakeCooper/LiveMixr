@@ -771,7 +771,7 @@ var CounterComponent = React.createClass({
 	render: function() {
 		return (
 			<span className="skip-button-container">
-				<button className="btn btn-default skip" onClick={this.updateSkip}>{this.state.skippers} Skips</button>
+				<button className="btn btn-default" onClick={this.updateSkip}>{this.state.skippers} Skips</button>
 			</span>
 		)
 	}
