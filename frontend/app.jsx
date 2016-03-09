@@ -731,7 +731,7 @@ var PlayBar = React.createClass({
                         <div className="info">
                             <p className="song">{this.state.title}</p>
                             <p className="artist-album">{this.state.artist}</p>
-                            <div>{this.state.listeners} users listening</div>
+                            <div>{this.state.listeners} { this.state.listeners > 1 ? 'listeners' : 'listener' } right now</div>
                             <CounterComponent user={this.props.user}/>
                         </div>
                     </div>
