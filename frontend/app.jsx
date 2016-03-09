@@ -246,20 +246,21 @@ var CommentBox = React.createClass({
 
 var CommentList = React.createClass({
     componentWillUpdate: function() {
-        var node = this.getDOMNode();
+        var node = ReactDOM.findDOMNode(this);
+        
         this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
     },
     componentDidUpdate: function() {
         if (this.shouldScrollBottom) {
-            var node = this.getDOMNode();
+            var node = ReactDOM.findDOMNode(this);
             node.scrollTop = node.scrollHeight
         }
     },
     render: function () {
         var Comments = (<div>Loading comments...</div>);
         if (this.props.comments) {
-            Comments = this.props.comments.map(function (comment) {
-                return (<Comment comment={comment}/>);
+            Comments = this.props.comments.map(function (comment, i) {
+                return <Comment comment={comment} key={i}/>;
             });
         }
         return (
@@ -289,13 +290,14 @@ var CommentForm = React.createClass({
         e.preventDefault();
         var that = this;
         //var author = this.refs.author.getDOMNode().value;
-        var text = this.refs.text.getDOMNode().value;
-        if (text == "") return;
+        var text = this.refs.text.value;
+        if (text == "")
+        	return;
         //var comment = {author: author, text: text};
-        var submitButton = this.refs.submit.getDOMNode();
+        var submitButton = this.refs.submit;
         submitButton.setAttribute('disabled', 'disabled');
         this.props.submitComment(text, function (err) {
-            that.refs.text.getDOMNode().value = '';
+            that.refs.text.value = '';
             submitButton.removeAttribute('disabled');
         });
     },
@@ -440,7 +442,7 @@ var BrowsePane = React.createClass({
 
         clearTimeout(this.timeout);
 
-        this.setState({ search: this.refs.searchtext.getDOMNode().value});
+        this.setState({ search: this.refs.searchtext.value});
         this.getTracks(this);
     },
     getTracks: function(that) {
@@ -468,7 +470,7 @@ var BrowsePane = React.createClass({
                 </div>
         } else if (this.state.items !== undefined && this.state.items.length > 0) {
             tracks = this.state.items.map(function (track, i) {
-                return (<BrowseItem track={track} owner={this}/>);
+                return (<BrowseItem track={track} owner={this} key={i}/>);
             }.bind(this));
         } else {
             tracks =
@@ -835,7 +837,7 @@ var VolumeComponent = React.createClass({
 	onDragStart: function(ev, i) {
 
 		// Check that the drag start event is targeting the curwsor
-		if(ev.target.className !== this.refs.cursor.props.className)
+		if(ev.target.className !== this.refs.cursor.className)
 			return;
 
 		// To retrieve the length of the bar, if it is ever to be changed by a media query or other source
@@ -922,7 +924,7 @@ var VolumeComponent = React.createClass({
 
 });
 
-React.render(
+ReactDOM.render(
 	<MainPage/>,
-	document.body
+	document.getElementById('main')
 );
