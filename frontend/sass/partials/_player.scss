@@ -45,8 +45,86 @@
       .artist-album {
         font-size: $font-size-large;
         color: #fff;
+        margin: 0 0 2px;
       }
     }
+    .volume-button {
+      display: inline-block;
+      position: relative;
+      color: #E0E0E0;
+      font-size: 20px;
+      margin-left: 15px;
+      cursor: pointer;
+
+      i {
+        width: 30px;
+        padding: 5px;
+
+        &:hover {
+          background-color: #424242;
+          border-radius: 4px;
+
+        }
+      }
+
+      .volume-container {
+
+        width: 140px;
+        display: block;
+        position: absolute;
+        top: -30px;
+        padding: 15px;
+        
+
+        .volume-bar {
+        background-color: #424242;
+        width: 140px;
+        height: 25px;
+        display: block;
+        z-index: 10;
+        border-radius: 6px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        cursor: default;
+
+          .volume-slider {
+            background-color: #757575;
+            top: 7px;
+            left: 10px;
+            width: 120px;
+            height: 10px;
+            position: relative;
+            border-radius: 6px;
+
+            .volume-inner {
+              position: absolute;
+              background-color: #E0E0E0;
+              border-radius: 6px;
+              top: 0;
+              bottom: 0;
+            }
+            .volume-position {
+              background-color: white;
+              border: 3px solid white;
+              border-radius: 8px;
+              display: block;
+              height: 12px;
+              position: absolute;
+              top: -1px;
+              width: 12px;
+              box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+              cursor: pointer;
+
+              &:active {
+                cursor: pointer;
+              }
+            }
+          }
+        }
+      }
+    }
+
     .skip-button-container {
       position: absolute;
       right: 25px;

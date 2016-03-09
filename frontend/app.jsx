@@ -674,6 +674,7 @@ var PlayBar = React.createClass({
 		this.queue = new Firebase('https://livemixr.firebaseio.com/queue/');
 		this.player = undefined;
 		this.promise = undefined;
+		this.volume = 1.0;
 
 		var that = this;
 
@@ -694,14 +695,30 @@ var PlayBar = React.createClass({
 		socket.emit('getseektime');
 	},
 
+	// Volume is a floating point between 0.0 (muted) and 1.0 (full)
+	onVolumeChanged: function(volume) {
+
+		this.volume = volume;
+
+		// TODO: The player might bug out when volume is set but the player is either a bad ptr or not actually playing a song; must investigate
+		if(this.player !== undefined && this.player._isPlaying === true) {
+
+			this.player.setVolume(this.volume);
+		}
+	},
 	setSong: function(seektime, data) {
 
 		// This sets the song info on the player bar
 		this.setState({ title: data.title, artist: data.user.username, cover: data.artwork_url });
 
 		// If a song is currently playing, pause it to stop the playback for the next song
-        if(this.player !== undefined)
-      		this.player.pause();
+        if(this.player !== undefined) {
+
+        	try{
+        		this.player.pause();
+        	}
+        	catch(e){}
+        }
 
         var that = this;
 
@@ -716,7 +733,6 @@ var PlayBar = React.createClass({
         		// The html5 player expects the currentTime to be in seconds; we lose accuracy here
         		// until a better way is figured out to change the song timing
         		player.controller._html5Audio.currentTime = seektime / 1000.0;
-
         	});
 
             player.play();
@@ -737,7 +753,8 @@ var PlayBar = React.createClass({
                         <div className="info">
                             <p className="song">{this.state.title}</p>
                             <p className="artist-album">{this.state.artist}</p>
-                            <div>{this.state.listeners} { this.state.listeners > 1 ? 'listeners' : 'listener' } right now</div>
+                            <span>{this.state.listeners} { this.state.listeners > 1 ? 'listeners' : 'listener' } right now</span>
+                            <VolumeComponent volumeEvent={this.onVolumeChanged}/>
                             <CounterComponent user={this.props.user}/>
                         </div>
                     </div>
@@ -775,6 +792,134 @@ var CounterComponent = React.createClass({
 			</span>
 		)
 	}
+});
+
+var VolumeComponent = React.createClass({ 
+
+	getInitialState: function() {
+		return {
+			showVolumeBar: false,
+			isDragging: false,
+			startPosition: 0,
+			startOffset: 0,
+			barLength: 120, // Length of the slider bar
+			offset: 120, // Current offset to start out (max volume)
+			currentVolume: 1.0,
+			isMuted: false
+		}
+	},
+
+	componentDidMount: function() {
+
+		window.addEventListener('dragstart', this.onDragStart);
+	    window.addEventListener('drag', this.onDrag);
+	    window.addEventListener('dragend', this.onDragEnd);
+	},
+
+	componentWillUnmount: function() {
+
+		window.removeEventListener('dragstart', this.onDragStart);
+	    window.removeEventListener('ondrag', this.onDrag);
+	    window.removeEventListener('ondragend', this.onDragEnd);
+	},
+
+	showVolumeBar: function() {
+
+		this.setState({showVolumeBar: true});
+	},
+
+	hideVolumeBar: function() {
+		this.setState({showVolumeBar: false});
+	},
+
+	onDragStart: function(ev, i) {
+
+		// Check that the drag start event is targeting the curwsor
+		if(ev.target.className !== this.refs.cursor.props.className)
+			return;
+
+		// To retrieve the length of the bar, if it is ever to be changed by a media query or other source
+		// which we may want in the future
+		//var length = parseInt(this.refs.inner.props.style.width); // Returns 120 currently
+
+		this.setState({isDragging: true, startPosition: ev.clientX, startOffset: this.state.offset});
+	},
+
+	onDrag: function(ev, i) {
+
+		if(!this.state.isDragging)
+			return;
+
+		// Get the change in X from the user dragging
+		var deltaX = ev.clientX - this.state.startPosition;
+
+		if(deltaX < -120)
+			return;
+
+		// Offset from the starting offset of the cursor when the drags began
+		var diff = deltaX + this.state.startOffset;
+
+		// Keep the cursor within range of 0 - bar length
+		var newOffset = Math.min(Math.max(diff, 0), this.state.barLength);
+
+		// The volume needs to be in a value from 0.0 to 1.0
+		var volume = newOffset / this.state.barLength;
+
+		this.setState({offset: newOffset, currentVolume: volume});
+
+		this.updateVolume();		
+	},
+
+	onDragEnd: function(ev, i) {
+
+		this.setState({isDragging: false});
+	},
+
+	onToggleMute: function() {
+		var muted = !this.state.isMuted;
+
+		// Use both methods to set state, as setState is asynchronous and when we use it in updateVolume(), it may not be set yet (race condition)
+		this.state.isMuted = muted;
+		this.setState({ isMuted: muted });
+
+		this.updateVolume();
+	},
+
+	// This tells the player the current volume
+	updateVolume: function() {
+
+		this.props.volumeEvent(this.state.isMuted ? 0.0 : this.state.currentVolume);
+	},
+
+	render: function() {
+
+		var innerStyle = {
+			width: this.state.offset + 'px'
+		};
+
+		var cursorStyle = {
+			// The bounds keep the cursor from going too far past the left or right extremum of the inner bar, to look good
+			left: (Math.min(Math.max(this.state.offset, 4), this.state.barLength-6) - 6) + 'px'
+		};
+
+		return (
+			<span className="volume-button" onClick={this.onToggleMute} onMouseEnter={this.showVolumeBar} onMouseLeave={this.hideVolumeBar}>
+				<i className={this.state.isMuted ? "fa fa-volume-off" : "fa fa-volume-up"}></i>
+				{ this.state.showVolumeBar ? 
+					<div className="volume-container">
+						<div className="volume-bar">
+							<div className="volume-slider">
+								<div ref="inner" className="volume-inner" style={ innerStyle }></div>
+								<span ref="cursor" className="volume-position" style={ cursorStyle } draggable="true"></span>
+							</div>
+						</div>
+					</div>
+					: false
+				}
+			</span>
+		)
+	}
+
 });
 
 React.render(

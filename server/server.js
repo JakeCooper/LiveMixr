@@ -294,6 +294,10 @@ io.on('connection', function (socket) {
 
 	socket.on('getseektime', function() {
 
+		// No song playing to send user
+		if(currentSong == undefined)
+			return;
+
 		if(songFinish != undefined)
 			socket.emit("playnextsong", (new Date).getTime() - songStart, currentSong.song);
 		else
