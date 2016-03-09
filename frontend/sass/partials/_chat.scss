@@ -37,6 +37,10 @@
           font-weight: bold;
           margin-bottom: $padding-large-vertical;
         }
+
+        .message-body {
+          word-wrap: break-word;
+        }
       }
     }
   }

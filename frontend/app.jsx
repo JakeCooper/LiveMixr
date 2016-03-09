@@ -278,7 +278,7 @@ var Comment = React.createClass({
                 </div>
                 <div className="content">
                     <span className="author">{this.props.comment.author}</span>
-                    <div className="body">{this.props.comment.text}</div>
+                    <div className="message-body">{this.props.comment.text}</div>
                 </div>
             </div>
         );
