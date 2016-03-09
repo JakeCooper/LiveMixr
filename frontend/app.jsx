@@ -417,9 +417,17 @@ var ChatPane = React.createClass({
 
 var BrowsePane = React.createClass({
     getInitialState: function() {
-        return {items: [], searching: true, search: "*"}
+        return {
+        	items: [], 
+        	searching: true, 
+        	search: "*"
+        }
     },
-    componentWillMount: function (){
+    componentDidMount: function() {
+        SC.initialize({
+            client_id: '562a196f46a9c2241f185373ee32d44a'
+        });  
+
         this.getTracks(this);
     },
     handleChange: function(sel) {
@@ -427,40 +435,38 @@ var BrowsePane = React.createClass({
         this.timeout = setTimeout(this.handleSubmit, 300);
     },
     handleSubmit: function (){
-        if (this.state.searching) return;
+        if (this.state.searching)
+        	return;
+
         clearTimeout(this.timeout);
+
         this.setState({ search: this.refs.searchtext.getDOMNode().value});
         this.getTracks(this);
     },
     getTracks: function(that) {
-        SC.initialize({
-            client_id: '562a196f46a9c2241f185373ee32d44a'
-        });
-
         this.setState({ searching: true});
+
         // find all sounds of buskers licensed under 'creative commons share alike'
         SC.get('/tracks', {
             q: this.state.search
         }).then(function(tracks) {
-            that.setState({items: []});
+        	that.setState({items: []});
             that.setState({ items: tracks, searching: false });
         });
     },
     reset: function() {
         this.setState({items: [], searching: false});
     },
-    appendToQueue: function() {
-        console.log("test");
-    },
 	render: function() {
         var tracks;
         var search = this.state.search;
+
         if (this.state.searching){
             tracks =
                 <div className="search-info search-loading">
                     <i className="fa fa-spinner fa-pulse"/>
                 </div>
-        } else if (this.state.items !== undefined && this.state.items.length > 0){
+        } else if (this.state.items !== undefined && this.state.items.length > 0) {
             tracks = this.state.items.map(function (track, i) {
                 return (<BrowseItem track={track} owner={this}/>);
             }.bind(this));
