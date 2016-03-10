@@ -665,7 +665,10 @@ var PlayBar = React.createClass({
 
 	getInitialState: function() {
 		return {
-			listeners: 0
+			listeners: 0,
+			title: "No song playing",
+			artist: "Select one from the browser",
+			cover: "/img/Album-Placeholder.svg"
 		}
 	},
 	componentDidMount: function () {
