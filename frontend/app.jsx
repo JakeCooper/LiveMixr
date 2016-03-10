@@ -498,8 +498,8 @@ var BrowsePane = React.createClass({
                                 <input type="text"
                                        ref="searchtext"
                                        className="form-control"
- 									   onKeyDown={this.handleEnter}
- 									   onChange={this.handleChange}
+                                       onKeyDown={this.handleEnter}
+                                       onChange={this.handleChange}
                                        placeholder="Search for a Song"
                                        maxLength="200"/>
                             </div>
