@@ -143,7 +143,7 @@ var Oauth = React.createClass({
 	                                best music on the web.
 	                            </div>
 	                            <div className="login-auth">
-	                                <button className="btn-google" type="submit" onClick={this.onLogin}>
+	                                <button className="btn-google" type="button" onClick={this.onLogin}>
 	                                    <i className="fa fa-google-plus"></i>
 	                                    <div>
 	                                        <small>Sign in with</small>
@@ -434,6 +434,7 @@ var BrowsePane = React.createClass({
         this.getTracks(this);
     },
     handleChange: function(sel) {
+
         clearTimeout(this.timeout);
         this.timeout = setTimeout(this.handleSubmit, 300);
     },
@@ -443,8 +444,14 @@ var BrowsePane = React.createClass({
 
         clearTimeout(this.timeout);
 
-        this.setState({ search: this.refs.searchtext.value});
-        this.getTracks(this);
+        this.setState({ search: this.refs.searchtext.value}, function() {
+
+        	this.getTracks(this);
+        });
+    },
+    handleEnter: function(ev) {
+    	if(ev.keyCode === 13)
+    		this.handleSubmit();
     },
     getTracks: function(that) {
         this.setState({ searching: true});
@@ -453,7 +460,6 @@ var BrowsePane = React.createClass({
         SC.get('/tracks', {
             q: this.state.search
         }).then(function(tracks) {
-        	that.setState({items: []});
             that.setState({ items: tracks, searching: false });
         });
     },
@@ -488,21 +494,20 @@ var BrowsePane = React.createClass({
                         <h1>Browse</h1>
                     </div>
                     <div className="search-form col-md-6">
-                        <form onSubmit={this.handleSubmit}>
                             <div className="search-box">
                                 <input type="text"
                                        ref="searchtext"
                                        className="form-control"
-                                       onChange={this.handleChange}
+ 									   onKeyDown={this.handleEnter}
+ 									   onChange={this.handleChange}
                                        placeholder="Search for a Song"
                                        maxLength="200"/>
                             </div>
                             <div className="search-button">
-                                <button ref="submit" type="submit" className="btn btn-primary">
+                                <button ref="submit" type="button" className="btn btn-primary" onClick={this.handleSubmit}>
                                     <i className='fa fa-search'></i>
                                 </button>
                             </div>
-                        </form>
                     </div>
                 </div>
                 <div className="row">
