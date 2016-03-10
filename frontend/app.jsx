@@ -668,7 +668,9 @@ var PlayBar = React.createClass({
 			listeners: 0,
 			title: "No song playing",
 			artist: "Select one from the browser",
-			cover: "/img/Album-Placeholder.svg"
+			cover: "/img/Album-Placeholder.svg",
+			trackUrl: undefined,
+			userUrl: undefined
 		}
 	},
 	componentDidMount: function () {
@@ -715,7 +717,7 @@ var PlayBar = React.createClass({
 	setSong: function(seektime, data) {
 
 		// This sets the song info on the player bar
-		this.setState({ title: data.title, artist: data.user.username, cover: data.artwork_url });
+		this.setState({ title: data.title, artist: data.user.username, cover: data.artwork_url, trackUrl: data.permalink_url, userUrl: data.user.permalink_url });
 
 		// If a song is currently playing, pause it to stop the playback for the next song
         if(this.player !== undefined) {
@@ -757,8 +759,8 @@ var PlayBar = React.createClass({
                     <img className="album-art" src={this.state.cover}/>
                     <div className="wrapper">
                         <div className="info">
-                            <p className="song">{this.state.title}</p>
-                            <p className="artist-album">{this.state.artist}</p>
+                            <a className="song" target="_blank" href={this.state.trackUrl || "#!"}>{this.state.title}</a>
+                            <a className="artist-album" target="_blank" href={this.state.userUrl || "#!"}>{this.state.artist}</a>
                             <span>{this.state.listeners} { this.state.listeners > 1 ? 'listeners' : 'listener' } right now</span>
                             <VolumeComponent volumeEvent={this.onVolumeChanged}/>
                             <CounterComponent user={this.props.user}/>
