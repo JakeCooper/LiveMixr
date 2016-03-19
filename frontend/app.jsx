@@ -1,5 +1,25 @@
 var socket = io();
 
+function addEvent(element, eventName, callback) {
+    if (element.addEventListener) {
+        element.addEventListener(eventName, callback, false);
+    } else if (element.attachEvent) {
+        element.attachEvent("on" + eventName, callback);
+	} else {
+		element["on" + type] = handler;
+	}
+}
+
+function removeEvent(element, eventName, callback) {
+    if (element.removeventListener) {
+        element.removeEventListener(eventName, callback, false);
+    } else if (element.detachEvent) {
+        element.detachEvent("on" + eventName, callback);
+    } else {
+		element["on" + type] = null;
+	}
+}
+
 var Oauth = React.createClass({
 	getInitialState: function () {
 		return {
@@ -824,16 +844,24 @@ var VolumeComponent = React.createClass({
 
 	componentDidMount: function() {
 
-		window.addEventListener('dragstart', this.onDragStart);
-		window.addEventListener('drag', this.onDrag);
-		window.addEventListener('dragend', this.onDragEnd);
+		this.mouseX = 0;
+		this.mouseY = 0;
+		this.fallbackDrag = false;
+
+		addEvent(window, 'dragstart', this.onDragStart);
+		addEvent(window, 'drag', this.onDrag);
+		addEvent(window, 'dragend', this.onDragEnd);
 	},
 
 	componentWillUnmount: function() {
 
-		window.removeEventListener('dragstart', this.onDragStart);
-		window.removeEventListener('ondrag', this.onDrag);
-		window.removeEventListener('ondragend', this.onDragEnd);
+		removeEvent(window, 'dragstart', this.onDragStart);
+		removeEvent(window, 'ondrag', this.onDrag);
+		removeEvent(window, 'ondragend', this.onDragEnd);
+
+		if(this.fallbackDrag) {
+			removeEvent(document, 'dragover', this.onDragOver);
+		}
 	},
 
 	showVolumeBar: function() {
@@ -845,11 +873,24 @@ var VolumeComponent = React.createClass({
 		this.setState({showVolumeBar: false});
 	},
 
+	doFallback: function() {
+
+		this.fallbackDrag = true;
+		addEvent(document, 'dragover', this.onDragOver);
+	},
+
 	onDragStart: function(ev, i) {
+
+		if(this.refs === undefined || this.refs.cursor === undefined)
+			return;
 
 		// Check that the drag start event is targeting the curwsor
 		if(ev.target.className !== this.refs.cursor.className)
 			return;
+
+		// Needed by firefox
+		ev.dataTransfer.setData('text/plain', '');
+		ev.dataTransfer.dropEffect = 'link';
 
 		// To retrieve the length of the bar, if it is ever to be changed by a media query or other source
 		// which we may want in the future
@@ -860,11 +901,16 @@ var VolumeComponent = React.createClass({
 
 	onDrag: function(ev, i) {
 
-		if(!this.state.isDragging)
+		// Check if we're receiving real values; if not, switch to using dragOver event for clientx/y
+		if(ev.clientX === 0 && ev.clientY === 0) {
+			this.doFallback();
+		}
+
+		if(!this.state.isDragging || (this.mouseX === 0 && this.fallbackDrag))
 			return;
 
 		// Get the change in X from the user dragging
-		var deltaX = ev.clientX - this.state.startPosition;
+		var deltaX = (this.fallbackDrag ? this.mouseX : ev.clientX) - this.state.startPosition;
 
 		if(deltaX < -120)
 			return;
@@ -883,6 +929,13 @@ var VolumeComponent = React.createClass({
 		this.updateVolume();		
 	},
 
+	onDragOver: function(ev, i) {
+
+		ev.dataTransfer.dropEffect = 'default';
+
+		this.mouseX = ev.clientX;
+		this.mouseY = ev.clientY;
+	},
 	onDragEnd: function(ev, i) {
 
 		this.setState({isDragging: false});
@@ -912,12 +965,14 @@ var VolumeComponent = React.createClass({
 	render: function() {
 
 		var innerStyle = {
-			width: this.state.offset + 'px'
+			width: this.state.offset + 'px',
+			cursor: 'default'
 		};
 
 		var cursorStyle = {
 			// The bounds keep the cursor from going too far past the left or right extremum of the inner bar, to look good
-			left: (Math.min(Math.max(this.state.offset, 4), this.state.barLength-6) - 6) + 'px'
+			left: (Math.min(Math.max(this.state.offset, 4), this.state.barLength-6) - 6) + 'px',
+			cursor: 'default'
 		};
 
 		return (
